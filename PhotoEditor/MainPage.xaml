@@ -151,7 +151,7 @@ THE SOFTWARE.
 
             </ScrollViewer>
             
-            <TextBlock x:Name="NoPicsText" Text="Sorry, we couldn't find any images in your Pictures library. Please add some pictures to your library and relaunch the app."
+            <TextBlock x:Name="NoPicsText" Text="无法找到图片，请将图片添加到系统图片库内再打开。"
                        HorizontalAlignment="Center" Margin="0,100,0,0"
                        Foreground="White" Visibility="Collapsed"/>
             

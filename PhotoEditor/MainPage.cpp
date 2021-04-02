@@ -1,18 +1,18 @@
 ﻿//  ---------------------------------------------------------------------------------
 //  Copyright (c) Microsoft Corporation.  All rights reserved.
-// 
+//
 //  The MIT License (MIT)
-// 
+//
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
 //  in the Software without restriction, including without limitation the rights
 //  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 //  copies of the Software, and to permit persons to whom the Software is
 //  furnished to do so, subject to the following conditions:
-// 
+//
 //  The above copyright notice and this permission notice shall be included in
 //  all copies or substantial portions of the Software.
-// 
+//
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -44,9 +44,8 @@ using namespace Windows::UI::Xaml::Media::Imaging;
 namespace winrt::PhotoEditor::implementation
 {
     // Page constructor.
-    MainPage::MainPage() : 
-        m_photos(winrt::single_threaded_observable_vector<IInspectable>()),
-        m_compositor(Window::Current().Compositor())
+    MainPage::MainPage() : m_photos(winrt::single_threaded_observable_vector<IInspectable>()),
+                           m_compositor(Window::Current().Compositor())
     {
         InitializeComponent();
         ParaView().Source(ForegroundElement());
@@ -60,7 +59,7 @@ namespace winrt::PhotoEditor::implementation
         {
             m_elementImplicitAnimation = m_compositor.CreateImplicitAnimationCollection();
 
-            // Define trigger and animation that should play when the trigger is triggered. 
+            // Define trigger and animation that should play when the trigger is triggered.
             m_elementImplicitAnimation.Insert(L"Offset", CreateOffsetAnimation());
 
             co_await GetItemsAsync();
@@ -69,6 +68,7 @@ namespace winrt::PhotoEditor::implementation
 
     IAsyncAction MainPage::OnContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
     {
+        // Gaein nidb: Get image.
         auto elementVisual = ElementCompositionPreview::GetElementVisual(args.ItemContainer());
         auto image = args.ItemContainer().ContentTemplateRoot().as<Image>();
 
@@ -84,8 +84,7 @@ namespace winrt::PhotoEditor::implementation
             //Add implicit animation to each visual.
             elementVisual.ImplicitAnimations(m_elementImplicitAnimation);
 
-            args.RegisterUpdateCallback([&](auto sender, auto args)
-            {
+            args.RegisterUpdateCallback([&](auto sender, auto args) {
                 OnContainerContentChanging(sender, args);
             });
 
@@ -97,8 +96,10 @@ namespace winrt::PhotoEditor::implementation
             // It's phase 1, so show this item's image.
             image.Opacity(100);
 
+            // Unbox the item.
             auto item = unbox_value<PhotoEditor::Photo>(args.Item());
-            Photo* impleType = from_abi<Photo>(item);
+            // Convert item to photo.
+            Photo *impleType = from_abi<Photo>(item);
 
             try
             {
@@ -110,7 +111,7 @@ namespace winrt::PhotoEditor::implementation
                 // File could be corrupt, or it might have an image file
                 // extension, but not really be an image file.
                 BitmapImage bitmapImage{};
-                Uri uri{ image.BaseUri().AbsoluteUri(), L"Assets/StoreLogo.png" };
+                Uri uri{image.BaseUri().AbsoluteUri(), L"Assets/StoreLogo.png"};
                 bitmapImage.UriSource(uri);
                 image.Source(bitmapImage);
             }
@@ -133,13 +134,13 @@ namespace winrt::PhotoEditor::implementation
     }
 
     // Registers property changed event handler.
-    event_token MainPage::PropertyChanged(PropertyChangedEventHandler const& value)
+    event_token MainPage::PropertyChanged(PropertyChangedEventHandler const &value)
     {
         return m_propertyChanged.add(value);
     }
 
     // Unregisters property changed event handler.
-    void MainPage::PropertyChanged(event_token const& token)
+    void MainPage::PropertyChanged(event_token const &token)
     {
         m_propertyChanged.remove(token);
     }
@@ -165,13 +166,15 @@ namespace winrt::PhotoEditor::implementation
         auto unsupportedFilesFound = false;
 
         // Populate Photos collection.
-        for (auto&& file : imageFiles)
+        for (auto &&file : imageFiles)
         {
-            // Only files on the local computer are supported. 
+            // Only files on the local computer are supported.
             // Files on OneDrive or a network location are excluded.
             if (file.Provider().Id() == L"computer")
             {
+                // Gaein nidb: Async load image.
                 auto image = co_await LoadImageInfoAsync(file);
+                // Gaein nidb: Add the image into IVector.
                 Photos().Append(image);
             }
             else
@@ -191,10 +194,11 @@ namespace winrt::PhotoEditor::implementation
 
         if (unsupportedFilesFound)
         {
+            // Gaein nidb: Set unsupported dialog.
             ContentDialog unsupportedFilesDialog{};
-            unsupportedFilesDialog.Title(box_value(L"Unsupported images found"));
-            unsupportedFilesDialog.Content(box_value(L"This sample app only supports images stored locally on the computer. We found files in your library that are stored in OneDrive or another network location. We didn't load those images."));
-            unsupportedFilesDialog.CloseButtonText(L"Ok");
+            unsupportedFilesDialog.Title(box_value(L"存在不支持的图片！"));
+            unsupportedFilesDialog.Content(box_value(L"仅支持本地图片，我们查找到了在OneDrive或者其它网络中的图片。我们不会为您加载这些图片。"));
+            unsupportedFilesDialog.CloseButtonText(L"确定");
 
             co_await unsupportedFilesDialog.ShowAsync();
         }
@@ -213,13 +217,13 @@ namespace winrt::PhotoEditor::implementation
         //Define Offset Animation for the Animation group.
         Vector3KeyFrameAnimation offsetAnimation = m_compositor.CreateVector3KeyFrameAnimation();
         offsetAnimation.InsertExpressionKeyFrame(1.0f, L"this.FinalValue");
-        TimeSpan span{ std::chrono::milliseconds{400} };
+        TimeSpan span{std::chrono::milliseconds{400}};
         offsetAnimation.Duration(span);
 
-        //Define Animation Target for this animation to animate using definition. 
+        //Define Animation Target for this animation to animate using definition.
         offsetAnimation.Target(L"Offset");
 
-        //Add Animations to Animation group. 
+        //Add Animations to Animation group.
         CompositionAnimationGroup animationGroup = m_compositor.CreateAnimationGroup();
         animationGroup.Add(offsetAnimation);
 
@@ -238,7 +242,7 @@ namespace winrt::PhotoEditor::implementation
     }
 
     // Triggers property changed notification.
-    void MainPage::RaisePropertyChanged(hstring const& propertyName)
+    void MainPage::RaisePropertyChanged(hstring const &propertyName)
     {
         m_propertyChanged(*this, PropertyChangedEventArgs(propertyName));
     }

@@ -55,6 +55,7 @@ namespace winrt::PhotoEditor::implementation
     DetailPage::DetailPage() : m_compositor(Window::Current().Compositor())
     {
         InitializeComponent();
+        // Init button.
         EditButton().IsChecked(true);
     }
 
