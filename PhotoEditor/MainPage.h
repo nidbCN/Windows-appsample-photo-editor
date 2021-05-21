@@ -1,87 +1,68 @@
-﻿//  ---------------------------------------------------------------------------------
-//  Copyright (c) Microsoft Corporation.  All rights reserved.
-// 
-//  The MIT License (MIT)
-// 
-//  Permission is hereby granted, free of charge, to any person obtaining a copy
-//  of this software and associated documentation files (the "Software"), to deal
-//  in the Software without restriction, including without limitation the rights
-//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//  copies of the Software, and to permit persons to whom the Software is
-//  furnished to do so, subject to the following conditions:
-// 
-//  The above copyright notice and this permission notice shall be included in
-//  all copies or substantial portions of the Software.
-// 
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE
-//  ---------------------------------------------------------------------------------
+﻿/*
+ * 主页面视图头文件
+ */
 
 #pragma once
 #include "MainPage.g.h"
 
 namespace winrt::PhotoEditor::implementation
 {
-    struct MainPage : MainPageT<MainPage>
-    {
-        MainPage();
+	struct MainPage : MainPageT<MainPage>
+	{
+		MainPage();
 
-        // Retreives collection of Photo objects for thumbnail view.
-        Windows::Foundation::Collections::IVector<Windows::Foundation::IInspectable> Photos() const
-        {
-            return m_photos;
-        }
+		// 返回图片方法
 
-        // Event handlers for loading and rendering images.
-        Windows::Foundation::IAsyncAction OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs);
-        Windows::Foundation::IAsyncAction OnContainerContentChanging(Windows::UI::Xaml::Controls::ListViewBase, Windows::UI::Xaml::Controls::ContainerContentChangingEventArgs);
+		Windows::Foundation::Collections::IVector<Windows::Foundation::IInspectable> [[nodiscard]] photos() const
+		{
+			return photos_;
+		}
 
-        // Animation for navigation back from DetailPage view.
-        Windows::Foundation::IAsyncAction StartConnectedAnimationForBackNavigation();
+		// 加载和渲染图片的事件句柄
+		Windows::Foundation::IAsyncAction on_navigated_to(Windows::UI::Xaml::Navigation::NavigationEventArgs);
+		Windows::Foundation::IAsyncAction on_container_content_changing(Windows::UI::Xaml::Controls::ListViewBase, Windows::UI::Xaml::Controls::ContainerContentChangingEventArgs);
 
-        // Property changed notifications.
-        event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const&);
-        void PropertyChanged(event_token const&);
+		// 从详情页导航回来的动画
+		Windows::Foundation::IAsyncAction start_connected_animation_for_back_navigation();
 
-        // Event handler.
-        void ImageGridView_ItemClick(Windows::Foundation::IInspectable const, Windows::UI::Xaml::Controls::ItemClickEventArgs const);
+		// 事件更改的通知
+		event_token property_changed(Windows::UI::Xaml::Data::PropertyChangedEventHandler const&);
+		void property_changed(event_token const&);
 
-    private:
-        // Functions for image loading and animation.
-        Windows::Foundation::IAsyncAction GetItemsAsync();
-        Windows::UI::Composition::CompositionAnimationGroup CreateOffsetAnimation();
-        Windows::Foundation::IAsyncOperation<PhotoEditor::Photo> LoadImageInfoAsync(Windows::Storage::StorageFile);
+		// 事件句柄
+		void image_grid_view_item_click(Windows::Foundation::IInspectable const, Windows::UI::Xaml::Controls::ItemClickEventArgs const);
 
-        // Backing field for Photo collection.
-        Windows::Foundation::Collections::IVector<IInspectable> m_photos{ nullptr };
+	private:
+		// 加载图片和动画的函数
+		Windows::Foundation::IAsyncAction get_items_async();
+		Windows::UI::Composition::CompositionAnimationGroup create_offset_animation();
+		Windows::Foundation::IAsyncOperation<PhotoEditor::Photo> load_image_info_async(Windows::Storage::StorageFile);
 
-        // Field to store selected Photo for later back navigation.
-        PhotoEditor::Photo m_persistedItem{ nullptr };
+		// 图片集合字段
+		Windows::Foundation::Collections::IVector<IInspectable> photos_{ nullptr };
 
-        // Collection of animations for element visuals for reorder animation.
-        Windows::UI::Composition::ImplicitAnimationCollection m_elementImplicitAnimation{ nullptr };
+		// 选中图片的字段
+		PhotoEditor::Photo selected_item_{ nullptr };
 
-        // Field to store page Compositor for creation of types in the Windows.UI.Composition namespace.
-        Windows::UI::Composition::Compositor m_compositor{ nullptr };
+		// 动画集合字段
+		Windows::UI::Composition::ImplicitAnimationCollection element_implicit_animation_{ nullptr };
 
-        // Event
-        event<Windows::Foundation::TypedEventHandler<Windows::UI::Xaml::Controls::ListViewBase, Windows::UI::Xaml::Controls::ContainerContentChangingEventArgs>> m_handler;
+		// 页面Compositor字段
+		Windows::UI::Composition::Compositor compositor_{ nullptr };
 
-        // Property changed notifications.
-        void RaisePropertyChanged(hstring const&);
-        event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
+		// 事件
+		event<Windows::Foundation::TypedEventHandler<Windows::UI::Xaml::Controls::ListViewBase, Windows::UI::Xaml::Controls::ContainerContentChangingEventArgs>> handler_;
 
-    };
+		// 属性更改通知
+		void raise_property_changed(hstring const&);
+		event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> property_changed_;
+
+	};
 }
 
 namespace winrt::PhotoEditor::factory_implementation
 {
-    struct MainPage : MainPageT<MainPage, implementation::MainPage>
-    {
-    };
+	struct MainPage : MainPageT<MainPage, implementation::MainPage>
+	{
+	};
 }

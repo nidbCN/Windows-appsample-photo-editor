@@ -1,5 +1,5 @@
 ﻿/*
- * 主页面视图
+ * 主页面视图代码
  */
 
 #include "pch.h"
@@ -26,8 +26,8 @@ namespace winrt::PhotoEditor::implementation
     /// <summary>
     /// 构造函数
     /// </summary>
-    MainPage::MainPage() : m_photos(winrt::single_threaded_observable_vector<IInspectable>()),
-                           m_compositor(Window::Current().Compositor())
+    MainPage::MainPage() : photos_(winrt::single_threaded_observable_vector<IInspectable>()),
+                           compositor_(Window::Current().Compositor())
     {
     	// 初始化组件
         InitializeComponent();
@@ -37,18 +37,18 @@ namespace winrt::PhotoEditor::implementation
     }
 
     // 加载用户图库中的图片集合
-    IAsyncAction MainPage::OnNavigatedTo(NavigationEventArgs e)
+    IAsyncAction MainPage::on_navigated_to(NavigationEventArgs e)
     {
         // 如果没有预加载则加载图片
-        if (Photos().Size() == 0)
+        if (photos().Size() == 0)
         {
-            m_elementImplicitAnimation = m_compositor.CreateImplicitAnimationCollection();
+            element_implicit_animation_ = compositor_.CreateImplicitAnimationCollection();
 
             // Define trigger and animation that should play when the trigger is triggered.
-            m_elementImplicitAnimation.Insert(L"Offset", CreateOffsetAnimation());
+            element_implicit_animation_.Insert(L"Offset", create_offset_animation());
 
         	// 加载图片元素
-            co_await GetItemsAsync();
+            co_await get_items_async();
         }
     }
 
@@ -58,7 +58,7 @@ namespace winrt::PhotoEditor::implementation
     /// <param name="sender">委托者</param>
     /// <param name="args">参数</param>
     /// <returns></returns>
-    IAsyncAction MainPage::OnContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+    IAsyncAction MainPage::on_container_content_changing(ListViewBase sender, ContainerContentChangingEventArgs args)
     {
         // 获取元素视图
         const auto element_visual = ElementCompositionPreview::GetElementVisual(args.ItemContainer());
@@ -70,7 +70,6 @@ namespace winrt::PhotoEditor::implementation
         {
         	// 取消引用
             element_visual.ImplicitAnimations(nullptr);
-
             image.Source(nullptr);
         }
 
@@ -78,11 +77,11 @@ namespace winrt::PhotoEditor::implementation
         if (args.Phase() == 0)
         {
             //对每个元素添加隐藏动画
-            element_visual.ImplicitAnimations(m_elementImplicitAnimation);
+            element_visual.ImplicitAnimations(element_implicit_animation_);
 
         	// 回调
             args.RegisterUpdateCallback([&](auto sender, auto args) {
-                OnContainerContentChanging(sender, args);
+                on_container_content_changing(sender, args);
             });
 
         	// 设置句柄
@@ -123,132 +122,150 @@ namespace winrt::PhotoEditor::implementation
         }
     }
 
-    // Called by the Loaded event of the ImageGridView for animation after back navigation from DetailPage view.
-    IAsyncAction MainPage::StartConnectedAnimationForBackNavigation()
+    /// <summary>
+    /// 从详情页返回主页面调用的动画
+    /// </summary>
+    /// <returns></returns>
+    IAsyncAction MainPage::start_connected_animation_for_back_navigation()
     {
-        // Run the connected animation for navigation back to the main page from the detail page.
-        if (m_persistedItem)
+        // 运行动画
+        if (selected_item_)
         {
-            ImageGridView().ScrollIntoView(m_persistedItem);
-            auto animation = ConnectedAnimationService::GetForCurrentView().GetAnimation(L"backAnimation");
-            if (animation)
+            ImageGridView().ScrollIntoView(selected_item_);
+        	// 创建动画并异步执行
+            if (const auto animation = ConnectedAnimationService::GetForCurrentView().GetAnimation(L"backAnimation"); animation)
             {
-                co_await ImageGridView().TryStartConnectedAnimationAsync(animation, m_persistedItem, L"ItemImage");
+                co_await ImageGridView().TryStartConnectedAnimationAsync(animation, selected_item_, L"ItemImage");
             }
         }
     }
 
-    // Registers property changed event handler.
-    event_token MainPage::PropertyChanged(PropertyChangedEventHandler const &value)
+    // 注册属性改动事件句柄
+    event_token MainPage::property_changed(PropertyChangedEventHandler const &value)
     {
-        return m_propertyChanged.add(value);
+        return property_changed_.add(value);
     }
 
-    // Unregisters property changed event handler.
-    void MainPage::PropertyChanged(event_token const &token)
+    // 取消注册属性改动事件句柄
+    void MainPage::property_changed(event_token const &token)
     {
-        m_propertyChanged.remove(token);
+        property_changed_.remove(token);
     }
 
-    // Loads images from the user's Pictures library.
-    IAsyncAction MainPage::GetItemsAsync()
+    // 从用户图库中加载图片     
+    IAsyncAction MainPage::get_items_async()
     {
-        // Show the loading progress bar.
+        // 显示加载进度条
         LoadProgressIndicator().Visibility(Windows::UI::Xaml::Visibility::Visible);
         NoPicsText().Visibility(Windows::UI::Xaml::Visibility::Collapsed);
 
-        // File type filter.
-        QueryOptions options{};
-        options.FolderDepth(FolderDepth::Deep);
+        // 文件后缀名过滤
+        const QueryOptions options{};
+        // 设置扫描深度
+        options.FolderDepth(FolderDepth::Deep);   
         options.FileTypeFilter().Append(L".jpg");
         options.FileTypeFilter().Append(L".png");
         options.FileTypeFilter().Append(L".gif");
 
-        // Get the Pictures library.
-        StorageFolder picturesFolder = KnownFolders::PicturesLibrary();
-        auto result = picturesFolder.CreateFileQueryWithOptions(options);
-        auto imageFiles = co_await result.GetFilesAsync();
-        auto unsupportedFilesFound = false;
+        // 从图库中获取图片
+        const auto result = KnownFolders::PicturesLibrary().CreateFileQueryWithOptions(options);
+        const auto &image_files = co_await result.GetFilesAsync();
+        auto has_unsupported_files = false;
 
-        // Populate Photos collection.
-        for (auto &&file : imageFiles)
+        // 填充图片集合
+        for (auto &&file : image_files)
         {
-            // Only files on the local computer are supported.
-            // Files on OneDrive or a network location are excluded.
+        	// 仅使用本机（computer）的填充，OneDrive和远程目录的图片不算在内
             if (file.Provider().Id() == L"computer")
             {
-                // Gaein nidb: Async load image.
-                auto image = co_await LoadImageInfoAsync(file);
-                // Gaein nidb: Add the image into IVector.
-                Photos().Append(image);
+                // 异步读取图片并添加
+                photos().Append(co_await load_image_info_async(file));
             }
             else
             {
-                unsupportedFilesFound = true;
+            	// 非本机图片，不受支持
+                has_unsupported_files = true;
             }
         }
 
-        if (Photos().Size() == 0)
+    	// 没有找到文件
+        if (photos().Size() == 0)
         {
-            // No pictures were found in the library, so show message.
+            // 显示消息
             NoPicsText().Visibility(Windows::UI::Xaml::Visibility::Visible);
         }
 
-        // Hide the loading progress bar.
+        // 隐藏加载进度条
         LoadProgressIndicator().Visibility(Windows::UI::Xaml::Visibility::Collapsed);
 
-        if (unsupportedFilesFound)
+    	// 存在不支持的文件，显示对话框
+        if (has_unsupported_files)
         {
-            // Gaein nidb: Set unsupported dialog.
-            ContentDialog unsupportedFilesDialog{};
-            unsupportedFilesDialog.Title(box_value(L"存在不支持的图片！"));
-            unsupportedFilesDialog.Content(box_value(L"仅支持本地图片，我们查找到了在OneDrive或者其它网络中的图片。我们不会为您加载这些图片。"));
-            unsupportedFilesDialog.CloseButtonText(L"确定");
+        	// 设置对话框
+            const ContentDialog unsupported_files_dialog{};
+            unsupported_files_dialog.Title(box_value(L"存在不支持的图片！"));
+            unsupported_files_dialog.Content(box_value(L"仅支持本地图片，查找到了在OneDrive或者其它远程的图片。无法加载这些图片。"));
+            unsupported_files_dialog.CloseButtonText(L"确定");
 
-            co_await unsupportedFilesDialog.ShowAsync();
+        	// 弹出对话框
+            co_await unsupported_files_dialog.ShowAsync();
         }
     }
 
-    // Creates a Photo from Storage file for adding to Photo collection.
-    IAsyncOperation<PhotoEditor::Photo> MainPage::LoadImageInfoAsync(StorageFile file)
+    /// <summary>
+    /// 从StorageFile创建Photo类型
+    /// </summary>
+    /// <param name="file">存储文件</param>
+    /// <returns>Photo</returns>
+    IAsyncOperation<PhotoEditor::Photo> MainPage::load_image_info_async(StorageFile file)
     {
         auto properties = co_await file.Properties().GetImagePropertiesAsync();
-        auto info = winrt::make<Photo>(properties, file, file.DisplayName(), file.DisplayType());
-        co_return info;
+        co_return winrt::make<Photo>(properties, file, file.DisplayName(), file.DisplayType());
     }
 
-    CompositionAnimationGroup MainPage::CreateOffsetAnimation()
+    /// <summary>
+    /// 创建便宜动画
+    /// </summary>
+    /// <returns></returns>
+    CompositionAnimationGroup MainPage::create_offset_animation()
     {
-        //Define Offset Animation for the Animation group.
-        Vector3KeyFrameAnimation offsetAnimation = m_compositor.CreateVector3KeyFrameAnimation();
-        offsetAnimation.InsertExpressionKeyFrame(1.0f, L"this.FinalValue");
-        TimeSpan span{std::chrono::milliseconds{400}};
-        offsetAnimation.Duration(span);
+        // 定义偏移动画
+        const auto offset_animation = compositor_.CreateVector3KeyFrameAnimation();
+    	// 时间片段
+        const TimeSpan span{ std::chrono::milliseconds{400} };
+    	
+        offset_animation.InsertExpressionKeyFrame(1.0f, L"this.FinalValue");
+        offset_animation.Duration(span);
 
-        //Define Animation Target for this animation to animate using definition.
-        offsetAnimation.Target(L"Offset");
+        // 定义动画目标
+        offset_animation.Target(L"Offset");
 
-        //Add Animations to Animation group.
-        CompositionAnimationGroup animationGroup = m_compositor.CreateAnimationGroup();
-        animationGroup.Add(offsetAnimation);
+        // 将动画添加到动画组中
+        auto animation_group = compositor_.CreateAnimationGroup();
+        animation_group.Add(offset_animation);
 
-        return animationGroup;
+        return animation_group;
     }
 
-    // Photo clicked event handler for navigation to DetailPage view.
-    void MainPage::ImageGridView_ItemClick(IInspectable const sender, ItemClickEventArgs const e)
+    // 点击图片导航到详情页的事件
+    void MainPage::image_grid_view_item_click(IInspectable const sender, ItemClickEventArgs const e)
     {
-        // Prepare the connected animation for navigation to the detail page.
-        m_persistedItem = e.ClickedItem().as<PhotoEditor::Photo>();
+        // 过渡动画
+        selected_item_ = e.ClickedItem().as<PhotoEditor::Photo>();
+    	
+        // ReSharper disable once CppExpressionWithoutSideEffects
         ImageGridView().PrepareConnectedAnimation(L"itemAnimation", e.ClickedItem(), L"ItemImage");
 
-        auto m_suppress = SuppressNavigationTransitionInfo();
+        const auto m_suppress = SuppressNavigationTransitionInfo();
         Frame().Navigate(xaml_typename<PhotoEditor::DetailPage>(), e.ClickedItem(), m_suppress);
     }
 
-    // Triggers property changed notification.
-    void MainPage::RaisePropertyChanged(hstring const &propertyName)
+    /// <summary>
+    /// 属性变更事件通知
+    /// </summary>
+    /// <param name="propertyName">属性名</param>
+    void MainPage::raise_property_changed(hstring const &propertyName)
     {
-        m_propertyChanged(*this, PropertyChangedEventArgs(propertyName));
+        property_changed_(*this, PropertyChangedEventArgs(propertyName));
     }
 }

@@ -112,17 +112,17 @@
 
                 <GridView x:Name="ImageGridView"
                   Margin="0,0,0,8"
-                  ItemClick="ImageGridView_ItemClick"
+                  ItemClick="image_grid_view_item_click"
                   IsItemClickEnabled="True"
-                  ItemsSource="{x:Bind Photos, Mode=OneWay}"
+                  ItemsSource="{x:Bind photos, Mode=OneWay}"
                   RelativePanel.AlignLeftWithPanel="True"
                   RelativePanel.AlignRightWithPanel="True"
                   RelativePanel.Below="TitleTextBlock"
-                  Loaded="{x:Bind StartConnectedAnimationForBackNavigation}"
+                  Loaded="{x:Bind start_connected_animation_for_back_navigation}"
                   ItemsPanel="{StaticResource ImageGridView_ItemsPanelTemplate}"
                   ItemTemplate="{StaticResource ImageGridView_DefaultItemTemplate}"
 
-                  ContainerContentChanging="OnContainerContentChanging">
+                  ContainerContentChanging="on_container_content_changing">
                 </GridView>
 
             </ScrollViewer>
