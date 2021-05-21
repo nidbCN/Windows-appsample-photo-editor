@@ -1,26 +1,6 @@
-﻿//  ---------------------------------------------------------------------------------
-//  Copyright (c) Microsoft Corporation.  All rights reserved.
-//
-//  The MIT License (MIT)
-//
-//  Permission is hereby granted, free of charge, to any person obtaining a copy
-//  of this software and associated documentation files (the "Software"), to deal
-//  in the Software without restriction, including without limitation the rights
-//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//  copies of the Software, and to permit persons to whom the Software is
-//  furnished to do so, subject to the following conditions:
-//
-//  The above copyright notice and this permission notice shall be included in
-//  all copies or substantial portions of the Software.
-//
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE
-//  ---------------------------------------------------------------------------------
+﻿/*
+ * 主页面视图
+ */
 
 #include "pch.h"
 #include "MainPage.h"
@@ -43,18 +23,23 @@ using namespace Windows::UI::Xaml::Media::Imaging;
 
 namespace winrt::PhotoEditor::implementation
 {
-    // Page constructor.
+    /// <summary>
+    /// 构造函数
+    /// </summary>
     MainPage::MainPage() : m_photos(winrt::single_threaded_observable_vector<IInspectable>()),
                            m_compositor(Window::Current().Compositor())
     {
+    	// 初始化组件
         InitializeComponent();
+
+    	// 设置视图源
         ParaView().Source(ForegroundElement());
     }
 
-    // Loads collection of Photos from users Pictures library.
+    // 加载用户图库中的图片集合
     IAsyncAction MainPage::OnNavigatedTo(NavigationEventArgs e)
     {
-        // Load photos if they haven't previously been loaded.
+        // 如果没有预加载则加载图片
         if (Photos().Size() == 0)
         {
             m_elementImplicitAnimation = m_compositor.CreateImplicitAnimationCollection();
@@ -62,58 +47,78 @@ namespace winrt::PhotoEditor::implementation
             // Define trigger and animation that should play when the trigger is triggered.
             m_elementImplicitAnimation.Insert(L"Offset", CreateOffsetAnimation());
 
+        	// 加载图片元素
             co_await GetItemsAsync();
         }
     }
 
+    /// <summary>
+    /// 容器内容改变时候的异步事件
+    /// </summary>
+    /// <param name="sender">委托者</param>
+    /// <param name="args">参数</param>
+    /// <returns></returns>
     IAsyncAction MainPage::OnContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
     {
-        // Gaein nidb: Get image.
-        auto elementVisual = ElementCompositionPreview::GetElementVisual(args.ItemContainer());
-        auto image = args.ItemContainer().ContentTemplateRoot().as<Image>();
+        // 获取元素视图
+        const auto element_visual = ElementCompositionPreview::GetElementVisual(args.ItemContainer());
+        // 获取图片
+    	const auto image = args.ItemContainer().ContentTemplateRoot().as<Image>();
 
+    	// 在回收队列中
         if (args.InRecycleQueue())
         {
-            elementVisual.ImplicitAnimations(nullptr);
+        	// 取消引用
+            element_visual.ImplicitAnimations(nullptr);
 
             image.Source(nullptr);
         }
 
+    	// 阶段0（隐藏图片）
         if (args.Phase() == 0)
         {
-            //Add implicit animation to each visual.
-            elementVisual.ImplicitAnimations(m_elementImplicitAnimation);
+            //对每个元素添加隐藏动画
+            element_visual.ImplicitAnimations(m_elementImplicitAnimation);
 
+        	// 回调
             args.RegisterUpdateCallback([&](auto sender, auto args) {
                 OnContainerContentChanging(sender, args);
             });
 
+        	// 设置句柄
             args.Handled(true);
         }
 
+    	// 阶段1（显示图片）
         if (args.Phase() == 1)
         {
-            // It's phase 1, so show this item's image.
-            image.Opacity(100);
 
-            // Unbox the item.
-            auto item = unbox_value<PhotoEditor::Photo>(args.Item());
-            // Convert item to photo.
-            Photo *impleType = from_abi<Photo>(item);
+        	// 设置透明度为100，显示图片
+            image.Opacity(100);
+        	
+            // 对元素拆箱
+            const auto item = unbox_value<PhotoEditor::Photo>(args.Item());
+            // 将类型转换为图片
+            Photo *converted_photo_type = from_abi<Photo>(item);
 
             try
             {
-                auto thumbnail = co_await impleType->GetImageThumbnailAsync();
-                image.Source(thumbnail);
+            	// 获取略缩图
+                const auto photo_small = co_await converted_photo_type->GetImageThumbnailAsync();
+                // 设置显示的图片为略缩图
+            	image.Source(photo_small);
             }
             catch (winrt::hresult_error)
             {
-                // File could be corrupt, or it might have an image file
-                // extension, but not really be an image file.
-                BitmapImage bitmapImage{};
-                Uri uri{image.BaseUri().AbsoluteUri(), L"Assets/StoreLogo.png"};
-                bitmapImage.UriSource(uri);
-                image.Source(bitmapImage);
+            	// 文件无法正常转换为Bitmap略缩图（也就是文件不是正常图片）
+                const BitmapImage error_image{};
+
+            	// 默认图片的URI
+                const Uri error_image_uri{image.BaseUri().AbsoluteUri(), L"Assets/StoreLogo.png"};
+
+            	// 设置显示的图片为默认图片
+            	error_image.UriSource(error_image_uri);
+                image.Source(error_image);
             }
         }
     }
