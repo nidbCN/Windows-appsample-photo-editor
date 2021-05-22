@@ -79,7 +79,7 @@
 
     <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <TextBlock x:Name="TitleTextBlock"
-                   Text="Collection"
+                   Text="图库"
                    Style="{StaticResource TitleTextBlockStyle}"
                    Margin="24,0,0,24" />
 

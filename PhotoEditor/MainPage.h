@@ -26,8 +26,8 @@ namespace winrt::PhotoEditor::implementation
 		Windows::Foundation::IAsyncAction start_connected_animation_for_back_navigation();
 
 		// 事件更改的通知
-		event_token property_changed(Windows::UI::Xaml::Data::PropertyChangedEventHandler const&);
-		void property_changed(event_token const&);
+		event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const&);
+		void PropertyChanged(event_token const&);
 
 		// 事件句柄
 		void image_grid_view_item_click(Windows::Foundation::IInspectable const, Windows::UI::Xaml::Controls::ItemClickEventArgs const);

@@ -32,11 +32,18 @@ namespace winrt::PhotoEditor::implementation
     	// 初始化组件
         InitializeComponent();
 
+        // 加载图片
+        get_items_async();
+
     	// 设置视图源
         ParaView().Source(ForegroundElement());
     }
 
-    // 加载用户图库中的图片集合
+    /// <summary>
+    /// 加载图库中的用户图片集合
+    /// </summary>
+    /// <param name="e"></param>
+    /// <returns></returns>
     IAsyncAction MainPage::on_navigated_to(NavigationEventArgs e)
     {
         // 如果没有预加载则加载图片
@@ -141,13 +148,13 @@ namespace winrt::PhotoEditor::implementation
     }
 
     // 注册属性改动事件句柄
-    event_token MainPage::property_changed(PropertyChangedEventHandler const &value)
+    event_token MainPage::PropertyChanged(PropertyChangedEventHandler const &value)
     {
         return property_changed_.add(value);
     }
 
     // 取消注册属性改动事件句柄
-    void MainPage::property_changed(event_token const &token)
+    void MainPage::PropertyChanged(event_token const &token)
     {
         property_changed_.remove(token);
     }
@@ -224,7 +231,7 @@ namespace winrt::PhotoEditor::implementation
     }
 
     /// <summary>
-    /// 创建便宜动画
+    /// 创建偏移动画
     /// </summary>
     /// <returns></returns>
     CompositionAnimationGroup MainPage::create_offset_animation()
