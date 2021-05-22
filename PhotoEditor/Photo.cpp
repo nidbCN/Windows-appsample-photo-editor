@@ -12,10 +12,6 @@ using namespace Windows::Storage::Streams;
 
 namespace winrt::PhotoEditor::implementation
 {
-    /// <summary>
-    /// 异步获取图片略缩图
-    /// </summary>
-    /// <returns>略缩图</returns>
     IAsyncOperation<BitmapImage> Photo::GetImageThumbnailAsync() const
     {
         const auto thumbnail = co_await m_imageFile.GetThumbnailAsync(FileProperties::ThumbnailMode::PicturesView);
@@ -29,10 +25,6 @@ namespace winrt::PhotoEditor::implementation
         co_return bitmapImage;
     }
 
-    /// <summary>
-    /// 异步获取图片源
-    /// </summary>
-    /// <returns>图片源</returns>
     IAsyncOperation<BitmapImage> Photo::GetImageSourceAsync() const
     {
         // 创建流
