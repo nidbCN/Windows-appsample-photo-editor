@@ -27,9 +27,9 @@
                         Margin="0,5,0,0"
                         StepFrequency="0.1"
                         ValueChanged="ZoomSlider_ValueChanged" />
-                <Button Content="Fit to screen"
+                <Button Content="适合屏幕"
                         Click="{x:Bind FitToScreen}" />
-                <Button Content="Show actual size"
+                <Button Content="实际大小"
                         Click="{x:Bind ShowActualSize}" />
             </StackPanel>
         </Flyout>
@@ -372,7 +372,7 @@
                     DefaultLabelPosition="Right">
             <AppBarButton x:Name="ZoomButton"
                           Icon="Zoom"
-                          Label="Zoom"
+                          Label="缩放"
                           Flyout="{StaticResource zoomFlyout}" />
             <AppBarToggleButton x:Name="EditButton"
                                 Icon="Edit"
@@ -412,7 +412,7 @@
                         Click="SelectEffectsButton_Click">
                     <Grid>
                         <Image x:Name="ButtonPreviewImage" Width="232" Height="64" Stretch="UniformToFill"/>
-                        <TextBlock Text="Select effects" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Text="选择效果" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Grid>
                 </Button>
 
@@ -446,37 +446,37 @@
                         <Grid Tag="color">
                             <Image x:Name="colorImage"/>
                             <Rectangle/>
-                            <TextBlock Text="Color"/>
+                            <TextBlock Text="颜色"/>
                         </Grid>
                         <Grid Tag="light">
                             <Image x:Name="lightImage"/>
                             <Rectangle/>
-                            <TextBlock Text="Light"/>
+                            <TextBlock Text="亮度"/>
                         </Grid>
                         <Grid Tag="blur">
                             <Image x:Name="blurImage"/>
                             <Rectangle/>
-                            <TextBlock Text="Blur"/>
+                            <TextBlock Text="模糊"/>
                         </Grid>
                         <Grid Tag="sepia">
                             <Image x:Name="sepiaImage"/>
                             <Rectangle/>
-                            <TextBlock Text="Sepia"/>
+                            <TextBlock Text="变旧"/>
                         </Grid>
                         <Grid Tag="grayscale">
                             <Image x:Name="grayscaleImage"/>
                             <Rectangle/>
-                            <TextBlock Text="Grayscale"/>
+                            <TextBlock Text="灰度"/>
                         </Grid>
                         <Grid Tag="invert">
                             <Image x:Name="invertImage"/>
                             <Rectangle/>
-                            <TextBlock Text="Invert"/>
+                            <TextBlock Text="反转"/>
                         </Grid>
                     </GridView>
                     <StackPanel Orientation="Horizontal" Grid.Row="1" >
-                        <Button Content="Apply" Click="ApplyEffectsButton_Click" Width="108" Margin="16,8,8,8"/>
-                        <Button Content="Cancel" Click="CancelEffectsButton_Click" Width="108" Margin="0"/>
+                        <Button Content="应用" Click="ApplyEffectsButton_Click" Width="108" Margin="16,8,8,8"/>
+                        <Button Content="取消" Click="CancelEffectsButton_Click" Width="108" Margin="0"/>
                     </StackPanel>
                 </Grid>
 
@@ -552,7 +552,7 @@
                             </Grid.RowDefinitions>
 
                             <Rectangle/>
-                            <TextBlock Text="Color"
+                            <TextBlock Text="颜色"
                                    Style="{StaticResource CaptionTextBlockStyle}"/>
                             <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Right">
                                 <TextBlock Margin="0,0,4,0"
@@ -565,7 +565,7 @@
                                    Style="{StaticResource CaptionTextBlockStyle}"/>
                             </StackPanel>
 
-                            <Slider Header="Temperature"
+                            <Slider Header="色温"
                                 Grid.Row="1"
                                 Foreground="Transparent"
                                 Value="{x:Bind Item.Temperature, Mode=TwoWay}"
@@ -585,7 +585,7 @@
                                 </Slider.Background>
                             </Slider>
 
-                            <Slider Header="Tint"
+                            <Slider Header="色调"
                                 Grid.Row="2"
                                 Foreground="Transparent"
                                 Value="{x:Bind Item.Tint, Mode=TwoWay}"
@@ -605,7 +605,7 @@
                                 </Slider.Background>
                             </Slider>
 
-                            <Slider Header="Saturation"
+                            <Slider Header="饱和度"
                                 Grid.Row="3"
                                 Minimum="0"
                                 Maximum="1"
@@ -625,7 +625,7 @@
                             </Grid.RowDefinitions>
 
                             <Rectangle/>
-                            <TextBlock Text="Light"
+                            <TextBlock Text="亮度"
                                    Style="{StaticResource CaptionTextBlockStyle}"/>
                             <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Right">
                                 <TextBlock Margin="0,0,4,0"
@@ -638,7 +638,7 @@
                                    Style="{StaticResource CaptionTextBlockStyle}"/>
                             </StackPanel>
 
-                            <Slider Header="Exposure"
+                            <Slider Header="曝光"
                                 Grid.Row="1"
                                 Foreground="Transparent"
                                 Value="{x:Bind Item.Exposure, Mode=TwoWay}"
@@ -658,7 +658,7 @@
                                 </Slider.Background>
                             </Slider>
 
-                            <Slider Header="Contrast"
+                            <Slider Header="对比度"
                                 Grid.Row="2"
                                 Foreground="Transparent"
                                 Value="{x:Bind Item.Contrast, Mode=TwoWay}"
@@ -678,7 +678,7 @@
                             </Grid.RowDefinitions>
 
                             <Rectangle/>
-                            <TextBlock Text="Blur"
+                            <TextBlock Text="模糊"
                                    Style="{StaticResource CaptionTextBlockStyle}"/>
                             <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Right">
                                 <TextBlock Margin="0,0,4,0"
@@ -691,7 +691,7 @@
                                    Style="{StaticResource CaptionTextBlockStyle}"/>
                             </StackPanel>
 
-                            <Slider Header="Amount"
+                            <Slider Header="强度"
                                 Grid.Row="1"
                                 Value="{x:Bind Item.BlurAmount, Mode=TwoWay}"
                                 Minimum="0"
@@ -710,7 +710,7 @@
                             </Grid.RowDefinitions>
 
                             <Rectangle/>
-                            <TextBlock Text="Sepia"
+                            <TextBlock Text="变旧"
                                    Style="{StaticResource CaptionTextBlockStyle}"/>
                             <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Right">
                                 <TextBlock Margin="0,0,4,0"
@@ -723,7 +723,7 @@
                                    Style="{StaticResource CaptionTextBlockStyle}"/>
                             </StackPanel>
 
-                            <Slider Header="Intensity"
+                            <Slider Header="强度"
                                 Grid.Row="1"
                                 Value="{x:Bind Item.Intensity, Mode=TwoWay}"
                                 Minimum="0"
@@ -731,11 +731,11 @@
                         </Grid>
                     </Grid>
                     </ScrollViewer>
-                    <Button Content="Save" Width="100" Margin="0,12,0,8" Grid.Row="1" HorizontalAlignment="Left" Click="SaveButton_Click"/>
+                    <Button Content="保存" Width="100" Margin="0,12,0,8" Grid.Row="1" HorizontalAlignment="Left" Click="SaveButton_Click"/>
                     <Button x:Name="ResetButton" Click="{x:Bind ResetEffects}"
-                            Content="Reset" Width="100" Margin="0,12,0,8"  Grid.Row="1" HorizontalAlignment="Right"/>
+                            Content="重置" Width="100" Margin="0,12,0,8"  Grid.Row="1" HorizontalAlignment="Right"/>
                     <Button x:Name="RemoveAllEffectsButton" Click="RemoveAllEffectsButton_Click"
-                            Content="Remove all effects"
+                            Content="移除所有"
                             Width="208" Margin="0,0,0,8" Grid.Row="2"/>
                 </Grid>
             </Grid>

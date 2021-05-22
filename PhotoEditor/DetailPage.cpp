@@ -36,7 +36,7 @@ namespace winrt::PhotoEditor::implementation
     {
     	// 初始化组件
         InitializeComponent();
-        // Init butt
+        // 选中编辑按钮
         EditButton().IsChecked(true);
     }
 
@@ -45,7 +45,7 @@ namespace winrt::PhotoEditor::implementation
     /// </summary>
     void DetailPage::FitToScreen()
     {
-    	// 缩放比例
+    	// 计算缩放比例
         const auto width = MainImageScroller().ActualWidth() / Item().ImageProperties().Width();
         const auto height = MainImageScroller().ActualHeight() / Item().ImageProperties().Height();
         const auto zoom_factor = static_cast<float>(std::min(width, height));
@@ -55,12 +55,18 @@ namespace winrt::PhotoEditor::implementation
     }
 
     
+    /// <summary>
+    /// 显示实际大小
+    /// </summary>
     void DetailPage::ShowActualSize()
     {
+        // 缩放比例更改为1
         MainImageScroller().ChangeView(nullptr, nullptr, 1);
     }
 
-    // Changes image size after Tap, toggling between FitToScreen and ShowActualSize
+    /// <summary>
+    /// 在点击后更改图片缩放
+    /// </summary>
     void DetailPage::UpdateZoomState()
     {
         if (MainImageScroller().ZoomFactor() == 1)
@@ -73,12 +79,17 @@ namespace winrt::PhotoEditor::implementation
         }
     }
 
+    /// <summary>
+    /// 选择效果的按钮点击事件
+    /// </summary>
+    /// <param name=""></param>
+    /// <param name=""></param>
     void DetailPage::SelectEffectsButton_Click(IInspectable const&, RoutedEventArgs const&)
     {
-        // Show effects previews, hide controls.
+        // 显示效果预览
         VisualStateManager().GoToState(*this, L"ChooseEffects", true);
 
-        // Save selected effects so they can be restored if this op is canceled.
+        // 保存选中的效果，以便操作取消还可以还原
         m_selectedEffectsTemp.clear();
         for (auto&& effectItem : EffectPreviewGrid().SelectedItems())
         {
@@ -86,6 +97,9 @@ namespace winrt::PhotoEditor::implementation
         }
     }
 
+    /// <summary>
+    /// 更新面板状态
+    /// </summary>
     void DetailPage::UpdatePanelState()
     {
         if (m_showControls)
@@ -94,38 +108,45 @@ namespace winrt::PhotoEditor::implementation
         }
         else if (EffectPreviewGrid().SelectedItems().Size() == 0)
         {
-            // No effects are selected.
+            // 没有选择任何效果
             VisualStateManager().GoToState(*this, L"Normal", true);
         }
         else
         {
-            // Only effects with no additional controls are selected.
+            // 仅选中了没有调节的效果
             VisualStateManager().GoToState(*this, L"SaveEffects", true);
         }
     }
 
+    /// <summary>
+    /// 准备选中的效果
+    /// </summary>
     void DetailPage::PrepareSelectedEffects()
     {
+        // 清空效果
         m_effectsList.clear();
         m_animatablePropertiesList.clear();
 
+        // 折叠效果控制面板
         sepiaControlsGrid().Visibility(Visibility::Collapsed);
         blurControlsGrid().Visibility(Visibility::Collapsed);
         colorControlsGrid().Visibility(Visibility::Collapsed);
         lightControlsGrid().Visibility(Visibility::Collapsed);
 
+        // 取消显示效果控制面板
         m_showControls = false;
         GridView epg = EffectPreviewGrid().as<GridView>();
 
-        // Add effects.
+        // 添加选中的效果
         for (auto&& item : epg.SelectedItems())
         {
             auto preview = item.as<Grid>();
             auto tag = unbox_value<hstring>(preview.Tag());
 
+            // "switch-case"
             if (tag == L"sepia")
             {
-                // This intensity is applied only to the button preview.
+                // 仅用于按钮预览
                 m_sepiaEffect.Intensity(1.0f);
                 m_effectsList.push_back(m_sepiaEffect);
                 m_animatablePropertiesList.push_back(L"SepiaEffect.Intensity");
