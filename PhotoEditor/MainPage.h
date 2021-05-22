@@ -11,8 +11,10 @@ namespace winrt::PhotoEditor::implementation
 	{
 		MainPage();
 
-		// 返回图片方法
-
+		/// <summary>
+		/// 获取图片
+		/// </summary>
+		/// <returns></returns>
 		Windows::Foundation::Collections::IVector<Windows::Foundation::IInspectable> [[nodiscard]] photos() const
 		{
 			return photos_;

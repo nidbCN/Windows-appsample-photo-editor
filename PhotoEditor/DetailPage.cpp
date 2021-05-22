@@ -40,9 +40,6 @@ namespace winrt::PhotoEditor::implementation
         EditButton().IsChecked(true);
     }
 
-    /// <summary>
-    /// 缩放图片至适应屏幕
-    /// </summary>
     void DetailPage::FitToScreen()
     {
     	// 计算缩放比例
@@ -54,19 +51,12 @@ namespace winrt::PhotoEditor::implementation
     	MainImageScroller().ChangeView(nullptr, nullptr, zoom_factor);
     }
 
-    
-    /// <summary>
-    /// 显示实际大小
-    /// </summary>
     void DetailPage::ShowActualSize()
     {
         // 缩放比例更改为1
         MainImageScroller().ChangeView(nullptr, nullptr, 1);
     }
 
-    /// <summary>
-    /// 在点击后更改图片缩放
-    /// </summary>
     void DetailPage::UpdateZoomState()
     {
         if (MainImageScroller().ZoomFactor() == 1)
@@ -79,11 +69,6 @@ namespace winrt::PhotoEditor::implementation
         }
     }
 
-    /// <summary>
-    /// 选择效果的按钮点击事件
-    /// </summary>
-    /// <param name=""></param>
-    /// <param name=""></param>
     void DetailPage::SelectEffectsButton_Click(IInspectable const&, RoutedEventArgs const&)
     {
         // 显示效果预览
@@ -97,9 +82,6 @@ namespace winrt::PhotoEditor::implementation
         }
     }
 
-    /// <summary>
-    /// 更新面板状态
-    /// </summary>
     void DetailPage::UpdatePanelState()
     {
         if (m_showControls)
@@ -118,9 +100,6 @@ namespace winrt::PhotoEditor::implementation
         }
     }
 
-    /// <summary>
-    /// 准备选中的效果
-    /// </summary>
     void DetailPage::PrepareSelectedEffects()
     {
         // 清空效果
@@ -150,49 +129,58 @@ namespace winrt::PhotoEditor::implementation
                 m_sepiaEffect.Intensity(1.0f);
                 m_effectsList.push_back(m_sepiaEffect);
                 m_animatablePropertiesList.push_back(L"SepiaEffect.Intensity");
+                
+                // 显示控制面板
                 sepiaControlsGrid().Visibility(Visibility::Visible);
                 m_showControls = true;
             }
             else if (tag == L"invert")
             {
+                // 无预览
                 m_effectsList.push_back(m_invertEffect);
             }
             else if (tag == L"grayscale")
             {
+                // 无预览
                 m_effectsList.push_back(m_grayscaleEffect);
             }
             else if (tag == L"blur")
             {
-                // This blur amount is applied only to the button preview.
+                // 仅用于按钮预览
                 m_blurEffect.BlurAmount(2.5f);
                 m_effectsList.push_back(m_blurEffect);
                 m_animatablePropertiesList.push_back(L"BlurEffect.BlurAmount");
+                
                 blurControlsGrid().Visibility(Visibility::Visible);
                 m_showControls = true;
             }
             else if (tag == L"color")
             {
-                // These values are applied only to the button preview.
+                // 仅用于按钮预览
                 m_temperatureAndTintEffect.Temperature(0.25f);
                 m_temperatureAndTintEffect.Tint(-0.25f);
                 m_effectsList.push_back(m_temperatureAndTintEffect);
+                
                 m_animatablePropertiesList.push_back(L"TemperatureAndTintEffect.Temperature");
                 m_animatablePropertiesList.push_back(L"TemperatureAndTintEffect.Tint");
+                
                 m_effectsList.push_back(m_saturationEffect);
                 m_animatablePropertiesList.push_back(L"SaturationEffect.Saturation");
+                
                 colorControlsGrid().Visibility(Visibility::Visible);
                 m_showControls = true;
             }
             else if (tag == L"light")
             {
-                // This contrast amount is applied only to the button preview.
+                // 仅用于按钮预览
                 m_contrastEffect.Contrast(.25f);
                 m_effectsList.push_back(m_contrastEffect);
                 m_animatablePropertiesList.push_back(L"ContrastEffect.Contrast");
-                // This exposure amount is applied only to the button preview.
+                
                 m_exposureEffect.Exposure(-0.25f);
                 m_effectsList.push_back(m_exposureEffect);
                 m_animatablePropertiesList.push_back(L"ExposureEffect.Exposure");
+                
                 lightControlsGrid().Visibility(Visibility::Visible);
                 m_showControls = true;
             }
@@ -203,28 +191,46 @@ namespace winrt::PhotoEditor::implementation
 
     void DetailPage::ApplyEffects()
     {
+        // 准备选中的效果
         PrepareSelectedEffects();
+        // 更新
         UpdateMainImageBrush();
 
+        // 遍历效果列表，添加效果
         for (auto&& item : m_animatablePropertiesList)
         {
-            std::wstring str = static_cast<std::wstring>(item);
-            auto index = str.find_last_of(L'.', str.size());
-            hstring prop = static_cast<hstring>(str.substr(index + 1, str.size()));
+            // 将列表中的元素转化为字符串
+            std::wstring effect_name = static_cast<std::wstring>(item);
+
+            // 获取点的索引号
+            const auto index = effect_name.find_last_of(L'.', effect_name.size());
+
+            // 属性为以点分隔的子字符串
+            hstring prop = static_cast<hstring>(effect_name.substr(index + 1, effect_name.size()));
+            
+            // 更新效果笔刷
             UpdateEffectBrush(prop);
         }
     }
 
     void DetailPage::ApplyEffectsButton_Click(IInspectable const&, RoutedEventArgs const&)
     {
+        // 更新面板状态
         UpdatePanelState();
+        
+        // 应用效果
         ApplyEffects();
     }
 
     void DetailPage::CancelEffectsButton_Click(IInspectable const&, RoutedEventArgs const&)
     {
+        // 更新面板状态
         UpdatePanelState();
+        
+        // 情况选中的预览的效果
         EffectPreviewGrid().SelectedItems().Clear();
+        
+        // 从临时列表中添加效果，恢复以前选择的
         for (auto&& effectItem : m_selectedEffectsTemp)
         {
             EffectPreviewGrid().SelectedItems().Append(effectItem);
@@ -233,61 +239,73 @@ namespace winrt::PhotoEditor::implementation
 
     void DetailPage::UpdateButtonImageBrush()
     {
+        // 设置图片预览背景
         ButtonPreviewImage().Source(m_imageSource);
         ButtonPreviewImage().InvalidateArrange();
 
+        // 创建效果图形
         CreateEffectsGraph();
 
-        auto destinationBrush = m_compositor.CreateBackdropBrush();
-        auto graphicsEffectFactory = m_compositor.CreateEffectFactory(m_graphicsEffect);
+        // 创建目标笔刷
+        auto destination_brush = m_compositor.CreateBackdropBrush();
+        // 创建笔刷工厂
+        auto graphics_effect_factory = m_compositor.CreateEffectFactory(m_graphicsEffect);
 
-        auto previewBrush = graphicsEffectFactory.CreateBrush();
-        previewBrush.SetSourceParameter(L"Backdrop", destinationBrush);
+        // 从笔刷工厂创建笔刷
+        auto preview_brush = graphics_effect_factory.CreateBrush();
 
-        auto effectSprite = m_compositor.CreateSpriteVisual();
-        effectSprite.Size(float2{ 232, 64 });
-        effectSprite.Brush(previewBrush);
-        ElementCompositionPreview::SetElementChildVisual(ButtonPreviewImage(), effectSprite);
+        preview_brush.SetSourceParameter(L"Backdrop", destination_brush);
+
+        auto effect_sprite = m_compositor.CreateSpriteVisual();
+        effect_sprite.Size(float2{ 232, 64 });
+        effect_sprite.Brush(preview_brush);
+
+        ElementCompositionPreview::SetElementChildVisual(ButtonPreviewImage(), effect_sprite);
     }
 
-
-    // Adds or updates specific effect value within combined brush.
     void DetailPage::UpdateEffectBrush(hstring const& propertyName)
     {
         if (m_combinedBrush)
         {
+            // "switch-case"
             if (propertyName == L"Exposure")
             {
+                // 曝光
                 m_combinedBrush.Properties().InsertScalar(L"ExposureEffect.Exposure", Item().Exposure());
             }
             else if (propertyName == L"Temperature")
             {
+                // 色温
                 m_combinedBrush.Properties().InsertScalar(L"TemperatureAndTintEffect.Temperature", Item().Temperature());
             }
             else if (propertyName == L"Tint")
             {
+                // 色调
                 m_combinedBrush.Properties().InsertScalar(L"TemperatureAndTintEffect.Tint", Item().Tint());
             }
             else if (propertyName == L"Contrast")
             {
+                // 对比度
                 m_combinedBrush.Properties().InsertScalar(L"ContrastEffect.Contrast", Item().Contrast());
             }
             else if (propertyName == L"Saturation")
             {
+                // 饱和度
                 m_combinedBrush.Properties().InsertScalar(L"SaturationEffect.Saturation", Item().Saturation());
             }
             else if (propertyName == L"BlurAmount")
             {
+                // 模糊强度
                 m_combinedBrush.Properties().InsertScalar(L"BlurEffect.BlurAmount", Item().BlurAmount());
             }
             else if (propertyName == L"Intensity")
             {
+                // 变旧强度
                 m_combinedBrush.Properties().InsertScalar(L"SepiaEffect.Intensity", Item().Intensity());
             }
         }
     }
 
-    // Resets effects to their default values.
     void DetailPage::ResetEffects()
     {
         Item().Exposure(0);
@@ -298,10 +316,10 @@ namespace winrt::PhotoEditor::implementation
         Item().Saturation(1);
         Item().Intensity(0.5F);
     }
-
-    // Retrieves appropriate photo, sets up detail view, and performs animation.
+    
     IAsyncAction DetailPage::OnNavigatedTo(NavigationEventArgs e)
     {
+
         Item(e.Parameter().as<PhotoEditor::Photo>());
 
         if (auto item = Item())
@@ -309,8 +327,7 @@ namespace winrt::PhotoEditor::implementation
             Photo* impleType = from_abi<Photo>(item);
             m_imageSource = co_await impleType->GetImageSourceAsync();
 
-            // Because DetailPage can be destroyed during the life of the event handler, 
-            // it is good practice to create a weak_ref to *this, capture it in the lambda, and resolve it before use.
+            // 监听属性更改
             m_propertyChangedToken = item.PropertyChanged(auto_revoke, [weak{ get_weak() }](auto&&, auto&& args)
             {
                 if (auto strong = weak.get())
@@ -319,12 +336,14 @@ namespace winrt::PhotoEditor::implementation
                 }
             });
 
+            // 设置图片源
             targetImage().Source(m_imageSource);
 
-            ConnectedAnimation imageAnimation = ConnectedAnimationService::GetForCurrentView().GetAnimation(L"itemAnimation");
-            if (imageAnimation)
+            // 连接动画
+            auto image_animation = ConnectedAnimationService::GetForCurrentView().GetAnimation(L"itemAnimation");
+            if (image_animation)
             {
-                imageAnimation.Completed([weak{ get_weak() }](auto&&, auto&&)
+                image_animation.Completed([weak{ get_weak() }](auto&&, auto&&)
                 {
                     if (auto strong = weak.get())
                     {
@@ -339,12 +358,11 @@ namespace winrt::PhotoEditor::implementation
                     }
                 });
 
-                imageAnimation.TryStart(targetImage());
+                image_animation.TryStart(targetImage());
             }
             if (m_imageSource.PixelHeight() == 0 && m_imageSource.PixelWidth() == 0)
             {
-                // There is no editable image loaded. Disable zoom and edit
-                // to prevent other errors.
+                // 没有加载的图片，禁用编辑和缩放功能
                 EditButton().IsEnabled(false);
                 ZoomButton().IsEnabled(false);
             }
@@ -353,39 +371,47 @@ namespace winrt::PhotoEditor::implementation
         BackButton().IsEnabled(Frame().CanGoBack());
     }
 
-    // Prepares animation for navigation back to MainPage view.
     void DetailPage::OnNavigatingFrom(NavigatingCancelEventArgs const& e)
     {
         if (e.NavigationMode() == NavigationMode::Back)
         {
+            // 重置效果
             ResetEffects();
+            // 播放连接动画
             ConnectedAnimationService::GetForCurrentView().PrepareToAnimate(L"backAnimation", MainImage());
         }
     }
 
-    // Initializes image effects prior to creation of effect graph.
     void DetailPage::InitializeEffects()
     {
         m_saturationEffect.Name(L"SaturationEffect");
         m_saturationEffect.Saturation(Item().Saturation());
+
         m_sepiaEffect.Name(L"SepiaEffect");
         m_sepiaEffect.Intensity(Item().Intensity());
+
         m_invertEffect.Source(CompositionEffectSourceParameter{ L"source" });
+
         m_grayscaleEffect.Source(CompositionEffectSourceParameter{ L"source" });
+
         m_contrastEffect.Name(L"ContrastEffect");
         m_contrastEffect.Contrast(Item().Contrast());
+
         m_exposureEffect.Name(L"ExposureEffect");
         m_exposureEffect.Exposure(Item().Exposure());
+        
         m_temperatureAndTintEffect.Name(L"TemperatureAndTintEffect");
         m_temperatureAndTintEffect.Temperature(Item().Temperature());
+        
         m_blurEffect.Name(L"BlurEffect");
         m_blurEffect.BlurAmount(Item().BlurAmount());
         m_blurEffect.BorderMode(EffectBorderMode::Hard);
+        
         m_graphicsEffect.Sources().Append(CompositionEffectSourceParameter{ L"Backdrop" });
+        
         m_effectsList.push_back(m_graphicsEffect);
     }
 
-    // Creates all the thumbnail previews for effect selection UI.
     void DetailPage::InitializeEffectPreviews()
     {
         SepiaEffect sepiaEffect{};
@@ -417,7 +443,6 @@ namespace winrt::PhotoEditor::implementation
         InitializeEffectPreview(colorEffect, colorImage());
     }
 
-    // Creates a specified effect thumbnail for the effect preview UI.
     IAsyncAction DetailPage::InitializeEffectPreview(IInspectable compEffect, Image image)
     {
         Photo* implType = from_abi<Photo>(Item());
@@ -435,7 +460,6 @@ namespace winrt::PhotoEditor::implementation
         ElementCompositionPreview::SetElementChildVisual(image, effectSprite);
     }
 
-    // Creates the effects graph based on the selected effects.
     void DetailPage::CreateEffectsGraph()
     {
         auto as_source = [](auto&& arg) -> IGraphicsEffectSource
@@ -443,14 +467,14 @@ namespace winrt::PhotoEditor::implementation
             return arg;
         };
 
-        // Create effects chain from list of effects.
-        // The CompositeEffect is always the end of the chain and gets some special handling.
+        // 创建效果列表
         for (size_t i = 0; i < m_effectsList.size(); i++)
         {
             const auto& effect = m_effectsList[i];
 
             if (i == 0)
             {
+                // 第一个效果
                 std::visit([&graphicsEffect = m_graphicsEffect](auto&& effect)
                 {
                     CompositionEffectSourceParameter source{ L"Backdrop" };
@@ -468,6 +492,7 @@ namespace winrt::PhotoEditor::implementation
             }
             else if (i < m_effectsList.size() - 1)
             {
+                // 不是最后一个效果
                 std::visit([source = std::visit(as_source, m_effectsList[i - 1])](auto&& effect)
                 {
                     if constexpr (!std::is_same_v<CompositeEffect, std::decay_t<decltype(effect)>>)
@@ -478,7 +503,7 @@ namespace winrt::PhotoEditor::implementation
             }
             else
             {
-                // CompositeEffect is the last effect in the chain.
+                // 符合效果是列表的最后一项
                 auto const& sources = m_graphicsEffect.Sources();
                 sources.Clear();
                 sources.Append(std::visit(as_source, m_effectsList[i - 1]));
@@ -491,37 +516,37 @@ namespace winrt::PhotoEditor::implementation
         MainImage().Source(m_imageSource);
         MainImage().InvalidateArrange();
 
+        // 创建效果图像
         CreateEffectsGraph();
 
-        auto destinationBrush = m_compositor.CreateBackdropBrush();
-        auto graphicsEffectFactory = m_compositor.CreateEffectFactory(m_graphicsEffect, m_animatablePropertiesList);
+        // 目标笔刷
+        auto destination_brush = m_compositor.CreateBackdropBrush();
+        // 效果工厂
+        auto graphics_effect_factory = m_compositor.CreateEffectFactory(m_graphicsEffect, m_animatablePropertiesList);
 
-        m_combinedBrush = graphicsEffectFactory.CreateBrush();
-        m_combinedBrush.SetSourceParameter(L"Backdrop", destinationBrush);
+        m_combinedBrush = graphics_effect_factory.CreateBrush();
+        m_combinedBrush.SetSourceParameter(L"Backdrop", destination_brush);
 
-        auto effectSprite = m_compositor.CreateSpriteVisual();
-        effectSprite.Size(float2{ static_cast<float>(m_imageSource.PixelWidth()), static_cast<float>(m_imageSource.PixelHeight()) });
-        effectSprite.Brush(m_combinedBrush);
-        ElementCompositionPreview::SetElementChildVisual(MainImage(), effectSprite);
+        const auto effect_sprite = m_compositor.CreateSpriteVisual();
+        effect_sprite.Size(float2{ static_cast<float>(m_imageSource.PixelWidth()), static_cast<float>(m_imageSource.PixelHeight()) });
+        effect_sprite.Brush(m_combinedBrush);
+        ElementCompositionPreview::SetElementChildVisual(MainImage(), effect_sprite);
     }
-
-    // Back button event handler for navigation back to MainPage.
+    
     void DetailPage::BackButton_ItemClick(IInspectable const&, RoutedEventArgs const&)
     {
-        auto m_suppress = SuppressNavigationTransitionInfo();
+        const auto m_suppress = SuppressNavigationTransitionInfo();
         if (Frame().CanGoBack())
         {
             Frame().GoBack(m_suppress);
         }
     }
 
-    // Edit button event handler for opening edit UI.
     void DetailPage::EditButton_Check(IInspectable const&, RoutedEventArgs const&)
     {
         EditPanel().Visibility(Visibility::Visible);
     }
 
-    // Edit button event handler for closing edit UI.
     void DetailPage::EditButton_Uncheck(IInspectable const&, RoutedEventArgs const&)
     {
         EditPanel().Visibility(Visibility::Collapsed);
@@ -529,11 +554,12 @@ namespace winrt::PhotoEditor::implementation
 
     void DetailPage::Effects_SelectionChanged(IInspectable const&, SelectionChangedEventArgs const&)
     {
+        // 准备选择的效果
         PrepareSelectedEffects();
+        // 更新按钮图片笔刷
         UpdateButtonImageBrush();
     }
 
-    // Event handler for zoom level change.
     void DetailPage::ZoomSlider_ValueChanged(IInspectable const&, Primitives::RangeBaseValueChangedEventArgs const& e)
     {
         if (MainImageScroller())
@@ -542,7 +568,6 @@ namespace winrt::PhotoEditor::implementation
         }
     }
 
-    // Event handler for zoom level change.
     void DetailPage::MainImageScroller_ViewChanged(IInspectable const& sender, ScrollViewerViewChangedEventArgs const&)
     {
         ZoomSlider().Value(sender.as<ScrollViewer>().ZoomFactor());
