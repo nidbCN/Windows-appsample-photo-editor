@@ -70,7 +70,7 @@ namespace winrt::PhotoEditor::implementation
             return m_imageFileType;
         }
 
-        // Gets or sets the image title.
+        // 获取或者设置图片标题
         hstring ImageTitle() const
         {
             return m_imageProperties.Title() == L"" ? m_imageName : m_imageProperties.Title();

@@ -113,7 +113,6 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <None Include="..\CONTRIBUTING.md" />
     <None Include="..\LICENSE.md" />
     <None Include="..\README.md" />
     <None Include="packages.config" />

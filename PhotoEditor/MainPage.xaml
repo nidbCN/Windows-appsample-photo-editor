@@ -10,7 +10,7 @@
     RequestedTheme="Dark">
     <Page.Resources>
 
-        <!-- Margins for grid items -->
+        <!-- 位置样式 -->
         <x:Int32 x:Key="LargeItemMarginValue">4</x:Int32>
         <Thickness x:Key="LargeItemMargin">4</Thickness>
         <x:Int32 x:Key="DesktopWindowSidePaddingValue">16</x:Int32>
@@ -102,12 +102,12 @@
               RelativePanel.Below="LoadProgressIndicator">
             <ParallaxView x:Name="ParaView" VerticalShift="50">
 
-                <!--Background element-->
+                <!--背景元素-->
                 <Image x:Name="BackgroundImage" Source="Assets/bg1.png"
                Stretch="UniformToFill"/>
             </ParallaxView>
 
-            <!--Foreground element-->
+            <!--前景元素-->
             <ScrollViewer x:Name="ForegroundElement">
 
                 <GridView x:Name="ImageGridView"
