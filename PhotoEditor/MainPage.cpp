@@ -101,7 +101,7 @@ namespace winrt::PhotoEditor::implementation
 
         	// 设置透明度为100，显示图片
             image.Opacity(100);
-        	
+
             // 对元素拆箱
             const auto item = unbox_value<PhotoEditor::Photo>(args.Item());
             // 将类型转换为图片
@@ -159,7 +159,7 @@ namespace winrt::PhotoEditor::implementation
         property_changed_.remove(token);
     }
 
-    // 从用户图库中加载图片     
+    // 从用户图库中加载图片
     IAsyncAction MainPage::get_items_async()
     {
         // 显示加载进度条
@@ -169,14 +169,15 @@ namespace winrt::PhotoEditor::implementation
         // 文件后缀名过滤
         const QueryOptions options{};
         // 设置扫描深度
-        options.FolderDepth(FolderDepth::Deep);   
+        options.FolderDepth(FolderDepth::Deep);
         options.FileTypeFilter().Append(L".jpg");
         options.FileTypeFilter().Append(L".png");
         options.FileTypeFilter().Append(L".gif");
 
         // 从图库中获取图片
         const auto result = KnownFolders::PicturesLibrary().CreateFileQueryWithOptions(options);
-        const auto &image_files = co_await result.GetFilesAsync();
+
+    	const auto &image_files = co_await result.GetFilesAsync();
         auto has_unsupported_files = false;
 
         // 填充图片集合
@@ -240,7 +241,7 @@ namespace winrt::PhotoEditor::implementation
         const auto offset_animation = compositor_.CreateVector3KeyFrameAnimation();
     	// 时间片段
         const TimeSpan span{ std::chrono::milliseconds{400} };
-    	
+
         offset_animation.InsertExpressionKeyFrame(1.0f, L"this.FinalValue");
         offset_animation.Duration(span);
 
@@ -259,7 +260,7 @@ namespace winrt::PhotoEditor::implementation
     {
         // 过渡动画
         selected_item_ = e.ClickedItem().as<PhotoEditor::Photo>();
-    	
+
         // ReSharper disable once CppExpressionWithoutSideEffects
         ImageGridView().PrepareConnectedAnimation(L"itemAnimation", e.ClickedItem(), L"ItemImage");
 

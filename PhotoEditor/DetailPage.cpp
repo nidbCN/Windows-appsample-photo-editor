@@ -721,7 +721,6 @@ namespace winrt::PhotoEditor::implementation
 					Item().ImageProperties().Height()
 				);
 
-				(*encoder_ptr).SetSoftwareBitmap(new_buffer);
 				co_await(*encoder_ptr).FlushAsync();
 
 				co_await Windows::Storage::CachedFileManager::CompleteUpdatesAsync(file);

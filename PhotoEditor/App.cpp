@@ -47,7 +47,7 @@ void App::OnLaunched(LaunchActivatedEventArgs const &e)
         // 创建
         rootFrame = Frame();
 
-        // Gaein nidb: 导航失败时候委托执行方法 OnNavigationFailed
+        // 导航失败时候委托执行方法 OnNavigationFailed
         rootFrame.NavigationFailed({this, &App::OnNavigationFailed});
 
 
