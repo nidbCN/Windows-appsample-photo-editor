@@ -141,8 +141,27 @@ namespace winrt::PhotoEditor::implementation
 		/// <param name=""></param>
 		/// <param name=""></param>
 		void EditButton_Uncheck(Windows::Foundation::IInspectable const&, Windows::UI::Xaml::RoutedEventArgs const&);
+		
+		/// <summary>
+		/// 关闭效果名称的文本块事件
+		/// </summary>
+		/// <param name=""></param>
+		/// <param name=""></param>
 		void TextBlock_Tapped(Windows::Foundation::IInspectable const&, Windows::UI::Xaml::Input::TappedRoutedEventArgs const&);
+		
+		/// <summary>
+		/// 移除所有效果的点击事件
+		/// </summary>
+		/// <param name=""></param>
+		/// <param name=""></param>
 		void RemoveAllEffectsButton_Click(Windows::Foundation::IInspectable const&, Windows::UI::Xaml::RoutedEventArgs const&);
+		
+		/// <summary>
+		/// 点击保存按钮的事件
+		/// </summary>
+		/// <param name=""></param>
+		/// <param name=""></param>
+		/// <returns></returns>
 		Windows::Foundation::IAsyncAction SaveButton_Click(Windows::Foundation::IInspectable const&, Windows::UI::Xaml::RoutedEventArgs const&);
 
 		/// <summary>
