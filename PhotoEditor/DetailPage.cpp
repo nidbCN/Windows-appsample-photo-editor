@@ -2,6 +2,7 @@
  * 图片详情视图代码
  */
 
+// ReSharper disable CppExpressionWithoutSideEffects
 #include "pch.h"
 #include "DetailPage.h"
 #include "Photo.h"
@@ -32,7 +33,7 @@ using namespace Windows::UI::Xaml::Navigation;
 
 namespace winrt::PhotoEditor::implementation
 {
-	DetailPage::DetailPage() : m_compositor(Window::Current().Compositor())
+	DetailPage::DetailPage() : compositor_(Window::Current().Compositor())
 	{
 		// 初始化组件
 		InitializeComponent();
@@ -48,6 +49,7 @@ namespace winrt::PhotoEditor::implementation
 		const auto zoom_factor = static_cast<float>(std::min(width, height));
 
 		// 更改视图
+		// ReSharper disable once CppExpressionWithoutSideEffects
 		MainImageScroller().ChangeView(nullptr, nullptr, zoom_factor);
 	}
 
@@ -75,16 +77,16 @@ namespace winrt::PhotoEditor::implementation
 		VisualStateManager().GoToState(*this, L"ChooseEffects", true);
 
 		// 保存选中的效果，以便操作取消还可以还原
-		m_selectedEffectsTemp.clear();
-		for (auto&& effectItem : EffectPreviewGrid().SelectedItems())
+		selected_effects_temp_.clear();
+		for (auto&& effect_item : EffectPreviewGrid().SelectedItems())
 		{
-			m_selectedEffectsTemp.push_back(effectItem);
+			selected_effects_temp_.push_back(effect_item);
 		}
 	}
 
 	void DetailPage::UpdatePanelState()
 	{
-		if (m_showControls)
+		if (show_controls_)
 		{
 			VisualStateManager().GoToState(*this, L"EditEffects", true);
 		}
@@ -103,8 +105,8 @@ namespace winrt::PhotoEditor::implementation
 	void DetailPage::PrepareSelectedEffects()
 	{
 		// 清空效果
-		m_effectsList.clear();
-		m_animatablePropertiesList.clear();
+		effects_list_.clear();
+		animatable_properties_list_.clear();
 
 		// 折叠效果控制面板
 		sepiaControlsGrid().Visibility(Visibility::Collapsed);
@@ -113,80 +115,80 @@ namespace winrt::PhotoEditor::implementation
 		lightControlsGrid().Visibility(Visibility::Collapsed);
 
 		// 取消显示效果控制面板
-		m_showControls = false;
-		GridView epg = EffectPreviewGrid().as<GridView>();
+		show_controls_ = false;
+		const auto epg = EffectPreviewGrid().as<GridView>();
 
 		// 添加选中的效果
 		for (auto&& item : epg.SelectedItems())
 		{
 			auto preview = item.as<Grid>();
-			auto tag = unbox_value<hstring>(preview.Tag());
+			const auto tag = unbox_value<hstring>(preview.Tag());
 
 			// "switch-case"
 			if (tag == L"sepia")
 			{
 				// 仅用于按钮预览
-				m_sepiaEffect.Intensity(1.0f);
-				m_effectsList.push_back(m_sepiaEffect);
-				m_animatablePropertiesList.push_back(L"SepiaEffect.Intensity");
+				sepia_effect_.Intensity(1.0f);
+				effects_list_.push_back(sepia_effect_);
+				animatable_properties_list_.push_back(L"SepiaEffect.Intensity");
 
 				// 显示控制面板
 				sepiaControlsGrid().Visibility(Visibility::Visible);
-				m_showControls = true;
+				show_controls_ = true;
 			}
 			else if (tag == L"invert")
 			{
 				// 无预览
-				m_effectsList.push_back(m_invertEffect);
+				effects_list_.push_back(invert_effect_);
 			}
 			else if (tag == L"grayscale")
 			{
 				// 无预览
-				m_effectsList.push_back(m_grayscaleEffect);
+				effects_list_.push_back(grayscale_effect_);
 			}
 			else if (tag == L"blur")
 			{
 				// 仅用于按钮预览
-				m_blurEffect.BlurAmount(2.5f);
-				m_effectsList.push_back(m_blurEffect);
-				m_animatablePropertiesList.push_back(L"BlurEffect.BlurAmount");
+				blur_effect_.BlurAmount(2.5f);
+				effects_list_.push_back(blur_effect_);
+				animatable_properties_list_.push_back(L"BlurEffect.BlurAmount");
 
 				blurControlsGrid().Visibility(Visibility::Visible);
-				m_showControls = true;
+				show_controls_ = true;
 			}
 			else if (tag == L"color")
 			{
 				// 仅用于按钮预览
-				m_temperatureAndTintEffect.Temperature(0.25f);
-				m_temperatureAndTintEffect.Tint(-0.25f);
-				m_effectsList.push_back(m_temperatureAndTintEffect);
+				temperature_and_tint_effect_.Temperature(0.25f);
+				temperature_and_tint_effect_.Tint(-0.25f);
+				effects_list_.push_back(temperature_and_tint_effect_);
 
-				m_animatablePropertiesList.push_back(L"TemperatureAndTintEffect.Temperature");
-				m_animatablePropertiesList.push_back(L"TemperatureAndTintEffect.Tint");
+				animatable_properties_list_.push_back(L"TemperatureAndTintEffect.Temperature");
+				animatable_properties_list_.push_back(L"TemperatureAndTintEffect.Tint");
 
-				m_effectsList.push_back(m_saturationEffect);
-				m_animatablePropertiesList.push_back(L"SaturationEffect.Saturation");
+				effects_list_.push_back(saturation_effect_);
+				animatable_properties_list_.push_back(L"SaturationEffect.Saturation");
 
 				colorControlsGrid().Visibility(Visibility::Visible);
-				m_showControls = true;
+				show_controls_ = true;
 			}
 			else if (tag == L"light")
 			{
 				// 仅用于按钮预览
-				m_contrastEffect.Contrast(.25f);
-				m_effectsList.push_back(m_contrastEffect);
-				m_animatablePropertiesList.push_back(L"ContrastEffect.Contrast");
+				contrast_effect_.Contrast(.25f);
+				effects_list_.push_back(contrast_effect_);
+				animatable_properties_list_.push_back(L"ContrastEffect.Contrast");
 
-				m_exposureEffect.Exposure(-0.25f);
-				m_effectsList.push_back(m_exposureEffect);
-				m_animatablePropertiesList.push_back(L"ExposureEffect.Exposure");
+				exposure_effect_.Exposure(-0.25f);
+				effects_list_.push_back(exposure_effect_);
+				animatable_properties_list_.push_back(L"ExposureEffect.Exposure");
 
 				lightControlsGrid().Visibility(Visibility::Visible);
-				m_showControls = true;
+				show_controls_ = true;
 			}
 		}
 
-		m_effectsList.push_back(m_graphicsEffect);
+		effects_list_.push_back(graphics_effect_);
 	}
 
 	void DetailPage::ApplyEffects()
@@ -197,7 +199,7 @@ namespace winrt::PhotoEditor::implementation
 		UpdateMainImageBrush();
 
 		// 遍历效果列表，添加效果
-		for (auto&& item : m_animatablePropertiesList)
+		for (auto&& item : animatable_properties_list_)
 		{
 			// 将列表中的元素转化为字符串
 			std::wstring effect_name = static_cast<std::wstring>(item);
@@ -231,7 +233,7 @@ namespace winrt::PhotoEditor::implementation
 		EffectPreviewGrid().SelectedItems().Clear();
 
 		// 从临时列表中添加效果，恢复以前选择的
-		for (auto&& effectItem : m_selectedEffectsTemp)
+		for (auto&& effectItem : selected_effects_temp_)
 		{
 			EffectPreviewGrid().SelectedItems().Append(effectItem);
 		}
@@ -240,23 +242,23 @@ namespace winrt::PhotoEditor::implementation
 	void DetailPage::UpdateButtonImageBrush()
 	{
 		// 设置图片预览背景
-		ButtonPreviewImage().Source(m_imageSource);
+		ButtonPreviewImage().Source(image_source_);
 		ButtonPreviewImage().InvalidateArrange();
 
 		// 创建效果图形
 		CreateEffectsGraph();
 
 		// 创建目标笔刷
-		auto destination_brush = m_compositor.CreateBackdropBrush();
+		auto destination_brush = compositor_.CreateBackdropBrush();
 		// 创建笔刷工厂
-		auto graphics_effect_factory = m_compositor.CreateEffectFactory(m_graphicsEffect);
+		auto graphics_effect_factory = compositor_.CreateEffectFactory(graphics_effect_);
 
 		// 从笔刷工厂创建笔刷
 		auto preview_brush = graphics_effect_factory.CreateBrush();
 
 		preview_brush.SetSourceParameter(L"Backdrop", destination_brush);
 
-		auto effect_sprite = m_compositor.CreateSpriteVisual();
+		auto effect_sprite = compositor_.CreateSpriteVisual();
 		effect_sprite.Size(float2{ 232, 64 });
 		effect_sprite.Brush(preview_brush);
 
@@ -265,43 +267,43 @@ namespace winrt::PhotoEditor::implementation
 
 	void DetailPage::UpdateEffectBrush(hstring const& propertyName)
 	{
-		if (m_combinedBrush)
+		if (combined_brush_)
 		{
 			// "switch-case"
 			if (propertyName == L"Exposure")
 			{
 				// 曝光
-				m_combinedBrush.Properties().InsertScalar(L"ExposureEffect.Exposure", Item().Exposure());
+				combined_brush_.Properties().InsertScalar(L"ExposureEffect.Exposure", Item().Exposure());
 			}
 			else if (propertyName == L"Temperature")
 			{
 				// 色温
-				m_combinedBrush.Properties().InsertScalar(L"TemperatureAndTintEffect.Temperature", Item().Temperature());
+				combined_brush_.Properties().InsertScalar(L"TemperatureAndTintEffect.Temperature", Item().Temperature());
 			}
 			else if (propertyName == L"Tint")
 			{
 				// 色调
-				m_combinedBrush.Properties().InsertScalar(L"TemperatureAndTintEffect.Tint", Item().Tint());
+				combined_brush_.Properties().InsertScalar(L"TemperatureAndTintEffect.Tint", Item().Tint());
 			}
 			else if (propertyName == L"Contrast")
 			{
 				// 对比度
-				m_combinedBrush.Properties().InsertScalar(L"ContrastEffect.Contrast", Item().Contrast());
+				combined_brush_.Properties().InsertScalar(L"ContrastEffect.Contrast", Item().Contrast());
 			}
 			else if (propertyName == L"Saturation")
 			{
 				// 饱和度
-				m_combinedBrush.Properties().InsertScalar(L"SaturationEffect.Saturation", Item().Saturation());
+				combined_brush_.Properties().InsertScalar(L"SaturationEffect.Saturation", Item().Saturation());
 			}
 			else if (propertyName == L"BlurAmount")
 			{
 				// 模糊强度
-				m_combinedBrush.Properties().InsertScalar(L"BlurEffect.BlurAmount", Item().BlurAmount());
+				combined_brush_.Properties().InsertScalar(L"BlurEffect.BlurAmount", Item().BlurAmount());
 			}
 			else if (propertyName == L"Intensity")
 			{
 				// 变旧强度
-				m_combinedBrush.Properties().InsertScalar(L"SepiaEffect.Intensity", Item().Intensity());
+				combined_brush_.Properties().InsertScalar(L"SepiaEffect.Intensity", Item().Intensity());
 			}
 		}
 	}
@@ -325,10 +327,10 @@ namespace winrt::PhotoEditor::implementation
 		if (auto item = Item())
 		{
 			Photo* impleType = from_abi<Photo>(item);
-			m_imageSource = co_await impleType->GetImageSourceAsync();
+			image_source_ = co_await impleType->GetImageSourceAsync();
 
 			// 监听属性更改
-			m_propertyChangedToken = item.PropertyChanged(auto_revoke, [weak{ get_weak() }](auto&&, auto&& args)
+			property_changed_token_ = item.PropertyChanged(auto_revoke, [weak{ get_weak() }](auto&&, auto&& args)
 			{
 				if (auto strong = weak.get())
 				{
@@ -337,7 +339,7 @@ namespace winrt::PhotoEditor::implementation
 			});
 
 			// 设置图片源
-			targetImage().Source(m_imageSource);
+			targetImage().Source(image_source_);
 
 			// 连接动画
 			auto image_animation = ConnectedAnimationService::GetForCurrentView().GetAnimation(L"itemAnimation");
@@ -347,7 +349,7 @@ namespace winrt::PhotoEditor::implementation
 				{
 					if (auto strong = weak.get())
 					{
-						strong->MainImage().Source(strong->m_imageSource);
+						strong->MainImage().Source(strong->image_source_);
 						strong->MainImage().Visibility(Visibility::Visible);
 						strong->targetImage().Source(nullptr);
 
@@ -360,7 +362,7 @@ namespace winrt::PhotoEditor::implementation
 
 				image_animation.TryStart(targetImage());
 			}
-			if (m_imageSource.PixelHeight() == 0 && m_imageSource.PixelWidth() == 0)
+			if (image_source_.PixelHeight() == 0 && image_source_.PixelWidth() == 0)
 			{
 				// 没有加载的图片，禁用编辑和缩放功能
 				EditButton().IsEnabled(false);
@@ -384,32 +386,32 @@ namespace winrt::PhotoEditor::implementation
 
 	void DetailPage::InitializeEffects()
 	{
-		m_saturationEffect.Name(L"SaturationEffect");
-		m_saturationEffect.Saturation(Item().Saturation());
+		saturation_effect_.Name(L"SaturationEffect");
+		saturation_effect_.Saturation(Item().Saturation());
 
-		m_sepiaEffect.Name(L"SepiaEffect");
-		m_sepiaEffect.Intensity(Item().Intensity());
+		sepia_effect_.Name(L"SepiaEffect");
+		sepia_effect_.Intensity(Item().Intensity());
 
-		m_invertEffect.Source(CompositionEffectSourceParameter{ L"source" });
+		invert_effect_.Source(CompositionEffectSourceParameter{ L"source" });
 
-		m_grayscaleEffect.Source(CompositionEffectSourceParameter{ L"source" });
+		grayscale_effect_.Source(CompositionEffectSourceParameter{ L"source" });
 
-		m_contrastEffect.Name(L"ContrastEffect");
-		m_contrastEffect.Contrast(Item().Contrast());
+		contrast_effect_.Name(L"ContrastEffect");
+		contrast_effect_.Contrast(Item().Contrast());
 
-		m_exposureEffect.Name(L"ExposureEffect");
-		m_exposureEffect.Exposure(Item().Exposure());
+		exposure_effect_.Name(L"ExposureEffect");
+		exposure_effect_.Exposure(Item().Exposure());
 
-		m_temperatureAndTintEffect.Name(L"TemperatureAndTintEffect");
-		m_temperatureAndTintEffect.Temperature(Item().Temperature());
+		temperature_and_tint_effect_.Name(L"TemperatureAndTintEffect");
+		temperature_and_tint_effect_.Temperature(Item().Temperature());
 
-		m_blurEffect.Name(L"BlurEffect");
-		m_blurEffect.BlurAmount(Item().BlurAmount());
-		m_blurEffect.BorderMode(EffectBorderMode::Hard);
+		blur_effect_.Name(L"BlurEffect");
+		blur_effect_.BlurAmount(Item().BlurAmount());
+		blur_effect_.BorderMode(EffectBorderMode::Hard);
 
-		m_graphicsEffect.Sources().Append(CompositionEffectSourceParameter{ L"Backdrop" });
+		graphics_effect_.Sources().Append(CompositionEffectSourceParameter{ L"Backdrop" });
 
-		m_effectsList.push_back(m_graphicsEffect);
+		effects_list_.push_back(graphics_effect_);
 	}
 
 	void DetailPage::InitializeEffectPreviews()
@@ -449,10 +451,10 @@ namespace winrt::PhotoEditor::implementation
 		image.Source(co_await implType->GetImageThumbnailAsync());
 		image.InvalidateArrange();
 
-		auto destinationBrush = m_compositor.CreateBackdropBrush();
-		auto graphicsEffectFactory = m_compositor.CreateEffectFactory(compEffect.as<IGraphicsEffect>());
+		auto destinationBrush = compositor_.CreateBackdropBrush();
+		auto graphicsEffectFactory = compositor_.CreateEffectFactory(compEffect.as<IGraphicsEffect>());
 		auto combinedBrush = graphicsEffectFactory.CreateBrush();
-		auto effectSprite = m_compositor.CreateSpriteVisual();
+		auto effectSprite = compositor_.CreateSpriteVisual();
 
 		combinedBrush.SetSourceParameter(L"source", destinationBrush);
 		effectSprite.Size(float2{ 188,88 });
@@ -468,14 +470,14 @@ namespace winrt::PhotoEditor::implementation
 		};
 
 		// 创建效果列表
-		for (size_t i = 0; i < m_effectsList.size(); i++)
+		for (size_t i = 0; i < effects_list_.size(); i++)
 		{
-			const auto& effect = m_effectsList[i];
+			const auto& effect = effects_list_[i];
 
 			if (i == 0)
 			{
 				// 第一个效果
-				std::visit([&graphicsEffect = m_graphicsEffect](auto&& effect)
+				std::visit([&graphicsEffect = graphics_effect_](auto&& effect)
 					{
 						CompositionEffectSourceParameter source{ L"Backdrop" };
 						if constexpr (std::is_same_v<CompositeEffect, std::decay_t<decltype(effect)>>)
@@ -490,10 +492,10 @@ namespace winrt::PhotoEditor::implementation
 						}
 					}, effect);
 			}
-			else if (i < m_effectsList.size() - 1)
+			else if (i < effects_list_.size() - 1)
 			{
 				// 不是最后一个效果
-				std::visit([source = std::visit(as_source, m_effectsList[i - 1])](auto&& effect)
+				std::visit([source = std::visit(as_source, effects_list_[i - 1])](auto&& effect)
 				{
 					if constexpr (!std::is_same_v<CompositeEffect, std::decay_t<decltype(effect)>>)
 					{
@@ -504,33 +506,33 @@ namespace winrt::PhotoEditor::implementation
 			else
 			{
 				// 符合效果是列表的最后一项
-				auto const& sources = m_graphicsEffect.Sources();
+				auto const& sources = graphics_effect_.Sources();
 				sources.Clear();
-				sources.Append(std::visit(as_source, m_effectsList[i - 1]));
+				sources.Append(std::visit(as_source, effects_list_[i - 1]));
 			}
 		}
 	}
 
 	void DetailPage::UpdateMainImageBrush()
 	{
-		MainImage().Source(m_imageSource);
+		MainImage().Source(image_source_);
 		MainImage().InvalidateArrange();
 
 		// 创建效果图像
 		CreateEffectsGraph();
 
 		// 目标笔刷
-		auto destination_brush = m_compositor.CreateBackdropBrush();
+		auto destination_brush = compositor_.CreateBackdropBrush();
 		// 效果工厂
-		auto graphics_effect_factory = m_compositor.CreateEffectFactory(m_graphicsEffect, m_animatablePropertiesList);
+		auto graphics_effect_factory = compositor_.CreateEffectFactory(graphics_effect_, animatable_properties_list_);
 
 		// 创建复合笔刷
-		m_combinedBrush = graphics_effect_factory.CreateBrush();
-		m_combinedBrush.SetSourceParameter(L"Backdrop", destination_brush);
+		combined_brush_ = graphics_effect_factory.CreateBrush();
+		combined_brush_.SetSourceParameter(L"Backdrop", destination_brush);
 
-		const auto effect_sprite = m_compositor.CreateSpriteVisual();
-		effect_sprite.Size(float2{ static_cast<float>(m_imageSource.PixelWidth()), static_cast<float>(m_imageSource.PixelHeight()) });
-		effect_sprite.Brush(m_combinedBrush);
+		const auto effect_sprite = compositor_.CreateSpriteVisual();
+		effect_sprite.Size(float2{ static_cast<float>(image_source_.PixelWidth()), static_cast<float>(image_source_.PixelHeight()) });
+		effect_sprite.Brush(combined_brush_);
 
 		// 设置显示效果
 		ElementCompositionPreview::SetElementChildVisual(MainImage(), effect_sprite);
@@ -662,11 +664,11 @@ namespace winrt::PhotoEditor::implementation
 			file_ext.begin(),
 			::towlower);
 
-		// 转换为hstring
+		// 转换为hString
 		const auto file_ext_h = hstring(file_ext);
 
 
-		// 文件类型JEPG、PNG、TIF、BMP
+		// 文件类型 JPEG、PNG、TIF、BMP
 		picker.FileTypeChoices().Insert(file_type, winrt::single_threaded_vector<hstring>({ file_ext_h }));
 
 		if (const auto& file = co_await picker.PickSaveFileAsync())
@@ -687,17 +689,31 @@ namespace winrt::PhotoEditor::implementation
 					const auto& encoder = co_await BitmapEncoder::CreateAsync(BitmapEncoder::PngEncoderId(), stream);
 					encoder_ptr = &encoder;
 				}
+				else if (file_ext == L".gif")
+				{
+					const auto& encoder = co_await BitmapEncoder::CreateAsync(BitmapEncoder::GifEncoderId(), stream);
+					encoder_ptr = &encoder;
+				}
 				else
 				{
+					// 不被支持的文件类型
 
+					// 设置对话框
+					const ContentDialog unsupported_files_dialog{};
+					unsupported_files_dialog.Title(box_value(L"无法保存图片！"));
+					unsupported_files_dialog.Content(box_value(L"不支持的图片编码类型，无法保存这种文件。"));
+					unsupported_files_dialog.CloseButtonText(L"确定");
+
+					// 弹出对话框
+					co_await unsupported_files_dialog.ShowAsync();
 				}
 
 				// 渲染图片
-				RenderTargetBitmap render_target_bitmap{};
+				const RenderTargetBitmap render_target_bitmap{};
 				co_await render_target_bitmap.RenderAsync(MainImage());
 
 				// 获取像素到缓存
-				IBuffer pixels = co_await render_target_bitmap.GetPixelsAsync();
+				const IBuffer pixels = co_await render_target_bitmap.GetPixelsAsync();
 				const auto new_buffer = SoftwareBitmap::CreateCopyFromBuffer(
 					pixels,
 					BitmapPixelFormat::Bgra8,
@@ -705,10 +721,8 @@ namespace winrt::PhotoEditor::implementation
 					Item().ImageProperties().Height()
 				);
 
-
-
 				(*encoder_ptr).SetSoftwareBitmap(new_buffer);
-				co_await (*encoder_ptr).FlushAsync();
+				co_await(*encoder_ptr).FlushAsync();
 
 				co_await Windows::Storage::CachedFileManager::CompleteUpdatesAsync(file);
 			}

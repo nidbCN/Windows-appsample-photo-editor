@@ -14,7 +14,7 @@ namespace winrt::PhotoEditor::implementation
 		/// <returns>照片对象</returns>
 		PhotoEditor::Photo Item() const
 		{
-			return m_item;
+			return item_;
 		}
 
 		/// <summary>
@@ -23,7 +23,7 @@ namespace winrt::PhotoEditor::implementation
 		/// <param name="value"></param>
 		void Item(PhotoEditor::Photo const& value)
 		{
-			m_item = value;
+			item_ = value;
 		}
 
 		/// <summary>
@@ -235,34 +235,32 @@ namespace winrt::PhotoEditor::implementation
 		/// </summary>
 		void UpdateButtonImageBrush();
 
-		// Backing field for Photo object.
-		PhotoEditor::Photo m_item{ nullptr };
+		// 图片元素的字段
+		PhotoEditor::Photo item_{ nullptr };
 
-		// Indicates whether the effects controls are shown.
-		bool m_showControls = false;
+		// 是否显示效果面板
+		bool show_controls_ = false;
 
-		event_revoker<Windows::UI::Xaml::Data::INotifyPropertyChanged> m_propertyChangedToken;
+		event_revoker<Windows::UI::Xaml::Data::INotifyPropertyChanged> property_changed_token_;
 
-		// Field to store page Compositor for creation of types in the Windows.UI.Composition namespace.
-		Windows::UI::Composition::Compositor m_compositor{ nullptr };
+		// 存储 Windows.UI.Composition 名称空间的页的字段
+		Windows::UI::Composition::Compositor compositor_{ nullptr };
 
-		// Fields for image effects, animation registration, and collection for effects graph.
-		Microsoft::Graphics::Canvas::Effects::ContrastEffect m_contrastEffect{};
-		Microsoft::Graphics::Canvas::Effects::ExposureEffect m_exposureEffect{};
-		Microsoft::Graphics::Canvas::Effects::TemperatureAndTintEffect m_temperatureAndTintEffect{};
-		Microsoft::Graphics::Canvas::Effects::GaussianBlurEffect m_blurEffect{};
-		Microsoft::Graphics::Canvas::Effects::SaturationEffect m_saturationEffect{};
-		Microsoft::Graphics::Canvas::Effects::SepiaEffect m_sepiaEffect{};
-		Microsoft::Graphics::Canvas::Effects::GrayscaleEffect m_grayscaleEffect{};
-		Microsoft::Graphics::Canvas::Effects::InvertEffect m_invertEffect{};
-		Microsoft::Graphics::Canvas::Effects::CompositeEffect m_graphicsEffect{};
-		Windows::UI::Composition::CompositionEffectBrush m_combinedBrush{ nullptr };
+		// 图片效果、动画的集合字段
+		Microsoft::Graphics::Canvas::Effects::ContrastEffect contrast_effect_{};
+		Microsoft::Graphics::Canvas::Effects::ExposureEffect exposure_effect_{};
+		Microsoft::Graphics::Canvas::Effects::TemperatureAndTintEffect temperature_and_tint_effect_{};
+		Microsoft::Graphics::Canvas::Effects::GaussianBlurEffect blur_effect_{};
+		Microsoft::Graphics::Canvas::Effects::SaturationEffect saturation_effect_{};
+		Microsoft::Graphics::Canvas::Effects::SepiaEffect sepia_effect_{};
+		Microsoft::Graphics::Canvas::Effects::GrayscaleEffect grayscale_effect_{};
+		Microsoft::Graphics::Canvas::Effects::InvertEffect invert_effect_{};
+		Microsoft::Graphics::Canvas::Effects::CompositeEffect graphics_effect_{};
+		Windows::UI::Composition::CompositionEffectBrush combined_brush_{ nullptr };
 
-		std::vector<Windows::Foundation::IInspectable> m_selectedEffectsTemp{};
-		std::vector<hstring> m_animatablePropertiesList{};
+		std::vector<Windows::Foundation::IInspectable> selected_effects_temp_{};
+		std::vector<hstring> animatable_properties_list_{};
 
-		// The effects do not inherit from a common interface that contracts the Source property, 
-		// so we need to use a std::variant.
 		std::vector<std::variant<Microsoft::Graphics::Canvas::Effects::ContrastEffect,
 			Microsoft::Graphics::Canvas::Effects::ExposureEffect,
 			Microsoft::Graphics::Canvas::Effects::TemperatureAndTintEffect,
@@ -271,10 +269,10 @@ namespace winrt::PhotoEditor::implementation
 			Microsoft::Graphics::Canvas::Effects::SepiaEffect,
 			Microsoft::Graphics::Canvas::Effects::GrayscaleEffect,
 			Microsoft::Graphics::Canvas::Effects::InvertEffect,
-			Microsoft::Graphics::Canvas::Effects::CompositeEffect>> m_effectsList{};
+			Microsoft::Graphics::Canvas::Effects::CompositeEffect>> effects_list_{};
 
-		// Photo image
-		Windows::UI::Xaml::Media::Imaging::BitmapImage m_imageSource{ nullptr };
+		// 照片图像源
+		Windows::UI::Xaml::Media::Imaging::BitmapImage image_source_{ nullptr };
 
 	};
 }

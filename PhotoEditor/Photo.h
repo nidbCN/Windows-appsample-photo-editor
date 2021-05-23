@@ -8,14 +8,16 @@ namespace winrt::PhotoEditor::implementation
 	{
 		Photo() = default;
 
-		Photo(Windows::Storage::FileProperties::ImageProperties const& props,
-			Windows::Storage::StorageFile const& imageFile,
+		Photo(
+			Windows::Storage::FileProperties::ImageProperties const& props,
+			Windows::Storage::StorageFile const& image_file,
 			hstring const& name,
-			hstring const& type) :
-			m_imageProperties(props),
+			hstring const& type
+		) :
+			image_properties_(props),
 			image_name_(name),
 			image_file_type_(type),
-			m_imageFile(imageFile)
+			image_file_(image_file)
 		{
 		}
 
@@ -23,37 +25,37 @@ namespace winrt::PhotoEditor::implementation
 		/// 异步获取图片略缩图
 		/// </summary>
 		/// <returns>略缩图</returns>
-		Windows::Foundation::IAsyncOperation<Windows::UI::Xaml::Media::Imaging::BitmapImage> GetImageThumbnailAsync() const;
+		Windows::Foundation::IAsyncOperation<Windows::UI::Xaml::Media::Imaging::BitmapImage> [[nodiscard]] GetImageThumbnailAsync() const;
 
 		/// <summary>
 		/// 异步获取原图片
 		/// </summary>
 		/// <returns>图片源</returns>
-		Windows::Foundation::IAsyncOperation<Windows::UI::Xaml::Media::Imaging::BitmapImage> GetImageSourceAsync() const;
+		Windows::Foundation::IAsyncOperation<Windows::UI::Xaml::Media::Imaging::BitmapImage> [[nodiscard]] GetImageSourceAsync() const;
 
 		/// <summary>
 		/// 图片文件属性
 		/// </summary>
 		/// <returns></returns>
-		Windows::Storage::StorageFile ImageFile() const
+		Windows::Storage::StorageFile [[nodiscard]] ImageFile() const
 		{
-			return m_imageFile;
+			return image_file_;
 		}
 
 		/// <summary>
 		/// 图片信息属性
 		/// </summary>
 		/// <returns></returns>
-		Windows::Storage::FileProperties::ImageProperties ImageProperties() const
+		Windows::Storage::FileProperties::ImageProperties [[nodiscard]] ImageProperties() const
 		{
-			return m_imageProperties;
+			return image_properties_;
 		}
 
 		/// <summary>
 		/// 图片名称
 		/// </summary>
 		/// <returns></returns>
-		hstring ImageName() const
+		hstring [[nodiscard]] ImageName() const
 		{
 			return image_name_;
 		}
@@ -62,7 +64,7 @@ namespace winrt::PhotoEditor::implementation
 		/// 图片文件类型
 		/// </summary>
 		/// <returns></returns>
-		hstring ImageFileType() const
+		hstring [[nodiscard]] ImageFileType() const
 		{
 			return image_file_type_;
 		}
@@ -71,22 +73,22 @@ namespace winrt::PhotoEditor::implementation
 		/// 获取或者设置图片标题
 		/// </summary>
 		/// <returns></returns>
-		hstring ImageTitle() const
+		hstring [[nodiscard]] ImageTitle() const
 		{
-			return m_imageProperties.Title() == L"" ? image_name_ : m_imageProperties.Title();
+			return image_properties_.Title() == L"" ? image_name_ : image_properties_.Title();
 		}
 
 		void ImageTitle(hstring const& value);
 
-		hstring ImageDimensions() const;
+		hstring [[nodiscard]] ImageDimensions() const;
 
 		/// <summary>
 		/// 获取曝光度
 		/// </summary>
 		/// <returns>曝光度值</returns>
-		float Exposure() const
+		float [[nodiscard]] Exposure() const
 		{
-			return m_exposure;
+			return exposure_;
 		}
 
 		/// <summary>
@@ -95,7 +97,7 @@ namespace winrt::PhotoEditor::implementation
 		/// <param name="value">曝光度值</param>
 		void Exposure(float value)
 		{
-			UpdateValue(L"Exposure", m_exposure, value);
+			update_value(L"Exposure", exposure_, value);
 		}
 
 
@@ -103,9 +105,9 @@ namespace winrt::PhotoEditor::implementation
 		/// 获取色温
 		/// </summary>
 		/// <returns>色温值</returns>
-		float Temperature() const
+		float [[nodiscard]] Temperature() const
 		{
-			return m_temperature;
+			return temperature_;
 		}
 
 		/// <summary>
@@ -114,16 +116,16 @@ namespace winrt::PhotoEditor::implementation
 		/// <param name="value">色温值</param>
 		void Temperature(float value)
 		{
-			UpdateValue(L"Temperature", m_temperature, value);
+			update_value(L"Temperature", temperature_, value);
 		}
 
 		/// <summary>
 		/// 获取色调
 		/// </summary>
 		/// <returns>色调值</returns>
-		float Tint() const
+		float [[nodiscard]] Tint() const
 		{
-			return m_tint;
+			return tint_;
 		}
 
 		/// <summary>
@@ -132,16 +134,16 @@ namespace winrt::PhotoEditor::implementation
 		/// <param name="value">色调值</param>
 		void Tint(float value)
 		{
-			UpdateValue(L"Tint", m_tint, value);
+			update_value(L"Tint", tint_, value);
 		}
 
 		/// <summary>
 		/// 获取对比度
 		/// </summary>
 		/// <returns>对比度值</returns>
-		float Contrast() const
+		float [[nodiscard]] Contrast() const
 		{
-			return m_contrast;
+			return contrast_;
 		}
 
 		/// <summary>
@@ -150,16 +152,16 @@ namespace winrt::PhotoEditor::implementation
 		/// <param name="value">对比度值</param>
 		void Contrast(float value)
 		{
-			UpdateValue(L"Contrast", m_contrast, value);
+			update_value(L"Contrast", contrast_, value);
 		}
 
 		/// <summary>
 		/// 获取饱和度
 		/// </summary>
 		/// <returns>饱和度值</returns>
-		float Saturation() const
+		float [[nodiscard]] Saturation() const
 		{
-			return m_saturation;
+			return saturation_;
 		}
 
 		/// <summary>
@@ -168,16 +170,16 @@ namespace winrt::PhotoEditor::implementation
 		/// <param name="value">饱和度值</param>
 		void Saturation(float value)
 		{
-			UpdateValue(L"Saturation", m_saturation, value);
+			update_value(L"Saturation", saturation_, value);
 		}
 
 		/// <summary>
 		/// 获取模糊强度
 		/// </summary>
 		/// <returns>模糊强度值</returns>
-		float BlurAmount() const
+		float [[nodiscard]] BlurAmount() const
 		{
-			return m_blur;
+			return blur_;
 		}
 
 		/// <summary>
@@ -186,27 +188,27 @@ namespace winrt::PhotoEditor::implementation
 		/// <param name="value">模糊强度值</param>
 		void BlurAmount(float value)
 		{
-			UpdateValue<float>(L"BlurAmount", m_blur, value);
+			update_value<float>(L"BlurAmount", blur_, value);
 		}
 
 		/// <summary>
 		/// 获取变旧的强度
 		/// </summary>
 		/// <returns>强度值</returns>
-		float Intensity() const
+		float [[nodiscard]] Intensity() const
 		{
-			return m_sepiaIntensity;
+			return sepia_intensity_;
 		}
 
 		/// <summary>
 		/// 设置变旧的强度
 		/// </summary>
 		/// <param name="value">强度值</param>
-		void Intensity(float value)
+		void Intensity(float const value)
 		{
-			UpdateValue<float>(L"Intensity", m_sepiaIntensity, value);
+			update_value<float>(L"Intensity", sepia_intensity_, value);
 		}
-		
+
 		/// <summary>
 		/// 属性更新通知
 		/// </summary>
@@ -214,58 +216,58 @@ namespace winrt::PhotoEditor::implementation
 		/// <returns></returns>
 		event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& value)
 		{
-			return m_propertyChanged.add(value);
+			return property_changed_.add(value);
 		}
 
 		void PropertyChanged(event_token const& token)
 		{
-			m_propertyChanged.remove(token);
+			property_changed_.remove(token);
 		}
 
 	private:
 		// 文件和信息字段
-		Windows::Storage::FileProperties::ImageProperties m_imageProperties{ nullptr };
-		Windows::Storage::StorageFile m_imageFile{ nullptr };
+		Windows::Storage::FileProperties::ImageProperties image_properties_{ nullptr };
+		Windows::Storage::StorageFile image_file_{ nullptr };
 		hstring image_name_;
 		hstring image_file_type_;
-		hstring m_imageTitle;
+		hstring image_title_;
 
 		// 图片效果字段
-		float m_exposure{ 0 };
-		float m_temperature{ 0 };
-		float m_tint{ 0 };
-		float m_contrast{ 0 };
-		float m_saturation{ 1 };
-		float m_blur{ 0 };
-		float m_sepiaIntensity{ .5f };
+		float exposure_{ 0 };
+		float temperature_{ 0 };
+		float tint_{ 0 };
+		float contrast_{ 0 };
+		float saturation_{ 1 };
+		float blur_{ 0 };
+		float sepia_intensity_{ .5f };
 
 		// 首页上的图片标题大小字段
 
-		double m_size{ 250 };
+		double size_{ 250 };
 
 		// 属性更改通知
-		event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
+		event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> property_changed_;
 
 		template <class T>
-		void UpdateValue(hstring const& propertyName, T& var, T value)
+		void update_value(hstring const& property_name, T& var, T value)
 		{
 			if (var != value)
 			{
 				var = value;
-				RaisePropertyChanged(propertyName);
+				raise_property_changed(property_name);
 			}
 		}
 
-		void RaisePropertyChanged(hstring const& propertyName)
+		void raise_property_changed(hstring const& property_name)
 		{
-			m_propertyChanged(*this, Windows::UI::Xaml::Data::PropertyChangedEventArgs(propertyName));
+			property_changed_(*this, Windows::UI::Xaml::Data::PropertyChangedEventArgs(property_name));
 		}
 	};
 }
 
 namespace winrt::PhotoEditor::factory_implementation
 {
-	struct Photo : PhotoT<Photo, implementation::Photo>
+	struct Photo final : PhotoT<Photo, implementation::Photo>
 	{
 	};
 }

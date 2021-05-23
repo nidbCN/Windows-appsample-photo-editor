@@ -93,7 +93,7 @@
     <ClInclude Include="MainPage.h">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </ClInclude>
-    <ClInclude Include="Photo.h">
+    <ClInclude Include="photo.h">
       <DependentUpon>Photo.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
@@ -113,8 +113,6 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <None Include="..\LICENSE.md" />
-    <None Include="..\README.md" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -141,7 +139,7 @@
     <ClCompile Include="MainPage.cpp">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </ClCompile>
-    <ClCompile Include="Photo.cpp">
+    <ClCompile Include="photo.cpp">
       <DependentUpon>Photo.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>

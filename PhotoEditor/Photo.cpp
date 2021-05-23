@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "Photo.h"
+#include "photo.h"
 #include <sstream>
 
 using namespace winrt;
@@ -14,23 +14,24 @@ namespace winrt::PhotoEditor::implementation
 {
     IAsyncOperation<BitmapImage> Photo::GetImageThumbnailAsync() const
     {
-        const auto thumbnail = co_await m_imageFile.GetThumbnailAsync(FileProperties::ThumbnailMode::PicturesView);
+        // 获取略缩图
+        const auto thumbnail = co_await image_file_.GetThumbnailAsync(FileProperties::ThumbnailMode::PicturesView);
         
-        BitmapImage bitmapImage{};
+        BitmapImage bitmap_image{};
         
         // 设置源为略缩图
-        bitmapImage.SetSource(thumbnail);
+        bitmap_image.SetSource(thumbnail);
         thumbnail.Close();
         
-        co_return bitmapImage;
+        co_return bitmap_image;
     }
 
     IAsyncOperation<BitmapImage> Photo::GetImageSourceAsync() const
     {
         // 创建流
-        IRandomAccessStream stream{ co_await ImageFile().OpenAsync(FileAccessMode::Read) };
+        const IRandomAccessStream stream{ co_await ImageFile().OpenAsync(FileAccessMode::Read) };
         
-        BitmapImage bitmap{};
+        const BitmapImage bitmap{};
         bitmap.SetSource(stream);
         
         co_return bitmap;
@@ -43,10 +44,10 @@ namespace winrt::PhotoEditor::implementation
     hstring Photo::ImageDimensions() const
     {
         // 创建字符串流
-        wstringstream stringStream;
+        wstringstream string_stream;
 
-        stringStream << m_imageProperties.Width() << " x " << m_imageProperties.Height();
-        wstring str = stringStream.str();
+        string_stream << image_properties_.Width() << " x " << image_properties_.Height();
+        const wstring str = string_stream.str();
         return static_cast<hstring>(str);
     }
 
@@ -56,11 +57,11 @@ namespace winrt::PhotoEditor::implementation
     /// <param name="value"></param>
     void Photo::ImageTitle(hstring const& value)
     {
-        if (m_imageProperties.Title() != value)
+        if (image_properties_.Title() != value)
         {
-            m_imageProperties.Title(value);
-            auto ignoreResult = m_imageProperties.SavePropertiesAsync();
-            RaisePropertyChanged(L"ImageTitle");
+            image_properties_.Title(value);
+            auto ignore_result = image_properties_.SavePropertiesAsync();
+            raise_property_changed(L"ImageTitle");
         }
     }
 }
